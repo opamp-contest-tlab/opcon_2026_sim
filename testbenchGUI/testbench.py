@@ -11,7 +11,7 @@ os.chdir(BASE_DIR)
 # オペアンプ設計コンテストのホームページから入手できるので任意の場所に配置し、ここでPATHを定義する
 DEP1_MODEL_PATH = BASE_DIR / "lib" / "new018.mdl"
 # 試作の部に参加したであれば、フェニテック社のモデルファイルを入手しているはずなので、それまでPATHを定義する
-DEP4_MODEL_PATH = "/home/cad/PDK/PDK_520/common/data/sim/lib/spice_model/PTS06_spice_400.txt"
+DEP4_MODEL_PATH = "/home/.../model.txt"
 
 
 def resolve_model_path(model_path, name):
