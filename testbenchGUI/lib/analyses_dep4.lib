@@ -1,0 +1,267 @@
+
+**********************************
+* Simulation for DC gain, phase margin
+**********************************
+.lib ac1
+
+VIN	inp 0 	dc 0 ac 1
+VDD	vdd 0	'half'
+VSS	0 vss	'half'
+ 
+X1	s inp out vdd vss	opamp
+RL	out 0			valrl
+CL  out 0           step
+RF	out s			valrf
+CF	s 0			valcf
+ 
+.PARAM half='psvoltage/2' valrl=5k valcl=0.5n valrf=1T valcf=10m
+.AC DEC 10 0.1 1T sweep step POI 3 '0.9*valcl' 'valcl' 'valcl*1.1'
+.PRINT VDB(out) VP(out)
+
+* DC gain
+.MEAS AC dcgain_db FIND VDB(out) AT=0.1
+
+* Gain bandwidth product
+.meas AC ugf when vdb(out)=0.0
+
+* Phase margin
+.meas AC pm min 'vp(out)+180' from=0.001 to=ugf
+
+.endl ac1
+
+**********************************
+* Simulation for bandwidth
+**********************************
+.lib ac2
+
+VIN	in 0 	dc 0 ac 1
+VDD	vdd 0	'half'
+VSS	0 vss	'half'
+ 
+X1 inm inp out vdd vss opamp
+R1 in  inm valr1
+R2 out inm valr2
+R3 in  inp valr3
+R4 inp 0   valr4
+RL out 0   valrl
+CL out 0   valcl
+ 
+.PARAM half='psvoltage/2'
++ valr1=10k valr2=90k valr3=10k valr4=10k 
++ valrl=5k valcl=0.5n
+.AC DEC 10 0.1 1T
+.PRINT VDB(out) VP(out)
+
+* DC gain
+.MEAS AC dcgain FIND VM(out) AT=0.1
+.MEAS AC dcgain_db FIND VDB(out) AT=0.1
+
+* bandwidth
+.meas ac bandwidth when vdb(out)='dcgain_db-3'
+
+.endl ac2
+
+**********************************
+* DC simulation for power dissipation, offset voltage
+**********************************
+.lib dc1
+
+VIN	in 0 	dc 0
+VDD	vdd 0	'half'
+VSS	0 vss	'half'
+ 
+X1 inm inp out vdd vss opamp
+R1 in  inm valr1
+R2 out inm valr2
+R3 in  inp valr3
+R4 inp 0   valr4
+RL out 0   valrl
+CL out 0   valcl
+ 
+.PARAM half='psvoltage/2'
++ valr1=10k valr2=90k valr3=10k valr4=10k 
++ valrl=5k valcl=0.5n
+.DC VIN -10m 10m 1m
+
+* power
+* .MEAS DC ivdd FIND I(VDD) AT 0
+* .MEAS DC ivss FIND I(VSS) AT 0
+.meas DC ivdd find isub(x1.vdd) at 0
+.meas DC ivss find isub(x1.vss) at 0
+.MEAS DC ib   PARAM='max(abs(ivdd),abs(ivss))'
+.MEAS DC pdis PARAM='ib*2*half'
+
+* offset voltage
+.MEAS DC offset find V(out) at 0
+
+.endl dc1
+
+**********************************
+* DC simulation for input voltage range
+**********************************
+.lib dc2
+
+VIN	in 0 	dc 0
+EIN2 in2 0 in 0 -1
+VDD	vdd 0	'half'
+VSS	0 vss	'half'
+
+* Positive side
+X1 inm inp out vdd vss opamp
+R1 in  inm valr1
+R2 out inm valr2
+R3 in  inp valr3
+R4 inp 0   valr4
+RL out 0   valrl
+CL out 0   valcl
+
+* Negative side
+X12 inm2 inp2 out2 vdd vss opamp
+R12 in2  inm2 valr1
+R22 out2 inm2 valr2
+R32 in2  inp2 valr3
+R42 inp2 0   valr4
+RL2 out2 0   valrl
+CL2 out2 0   valcl
+
+* offset
+Xos inmos inpos os vdd vss opamp
+R1os 0  inmos valr1
+R2os os inmos valr2
+R3os 0  inpos valr3
+R4os inpos 0   valr4
+RLos os 0   valrl
+CLos os 0   valcl
+
+.PARAM half='psvoltage/2'
++ valr1=10k valr2=90k valr3=10k valr4=10k 
++ valrl=5k valcl=0.5n
+.DC VIN 0 'half' 10m
+
+.PRINT V(out,os) V(out2,os)
+
+* input voltage range
+.meas dc vipos when par'abs(1 - abs(V(out,os)/(4*V(in))))' = 0.05 rise=1
+.meas dc vinega when par'abs(1 - abs(V(out2,os)/(4*V(in2))))' = 0.05 rise=1
+.meas dc inrng param='min(vipos, vinega)'
+
+.endl dc2
+
+**********************************
+* Transient simulation for Slewrate
+**********************************
+.lib tran1
+
+VDD	vdd 0	'half'
+VSS	0 vss	'half'
+ 
+* For rise edge slewrate
+X1 inm inp out vdd vss opamp
+R1 in  inm valr1
+R2 out inm valr2
+R3 in  inp valr3
+R4 inp 0   valr4
+RL out 0   valrl
+CL out 0   valcl
+ 
+* For fall edge slewrate
+X12 inm2 inp2 out2 vdd vss opamp
+R12 in2  inm2 valr1
+R22 out2 inm2 valr2
+R32 in2  inp2 valr3
+R42 inp2 0   valr4
+RL2 out2 0   valrl
+CL2 out2 0   valcl
+ 
+* Offset voltage
+* X13 inm3 inp3 out3 vdd vss opamp
+* R13 in3  inm3 valr1
+* R23 out3 inm3 valr2
+* R33 in3  inp3 valr3
+* R43 inp3 0   valr4
+* RL3 out3 0   valrl
+* CL3 out3 0   valcl
+
+* Stimulus
+VIN1 in 0 PWL (
++'td' '-vp'
++'td+tr' 'vp'
++'td+tr+tp' 'vp'
++'td+tr+tp+tf' 'vp/2'
++'td+tr+tp+tf+tp' 'vp/2' )
+ 
+E1	0 in2 in 0	1    $ inverted input for fall edge 
+
+.PARAM half='psvoltage/2'
++ valr1=10k valr2=90k valr3=10k valr4=10k 
++ valrl=5k valcl=0.5n
++ vp=100m         $ pulse amplitude, use your simulated value of maximum input voltage
++ td=100n         $ pulse delay
++ tr=0.5n         $ pulse rise time
++ tf=0.5n   	  $ pulse fall time
++ tp=500u         $ pulse width
+ 
+* Analysis
+* .TRAN 10p 1m    $ transient simulation for 400us with 10ps time step
+.TRAN 50n 1m    $ transient simulation for 400us with 10ps time step
+* .print v(in) v(out) v(in2) v(out2)
+ 
+* Measurements for rise edge (remove offset voltage from the output voltage)
+* .MEAS TRAN vo1min  FIND  V(out,out3) AT=0
+* .MEAS TRAN vo1max  FIND  V(out,out3) AT=200u
+* .MEAS TRAN vo1f    FIND  V(out,out3) AT=400u
+* .MEAS TRAN vi1f    FIND  V(in1)   AT=400u
+* .MEAS TRAN srr1 DERIV V(out,out3) WHEN V(out,out3)='0.9*vo1min'
+* .MEAS TRAN srr2 DERIV V(out,out3) WHEN V(out,out3)=0
+* .MEAS TRAN srr3 DERIV V(out,out3) WHEN V(out,out3)='0.9*vo1max'
+* .MEAS TRAN srr  PARAM='(srr1+srr2+srr3)/3'
+.meas tran t11 when v(out) = -360m fall=1
+.meas tran t21 when v(out) = 360m fall=1
+.meas tran srr param='0.72/(t21 - t11)'
+ 
+* Measurements for fall edge (remove offset voltage from the output voltage)
+* .MEAS TRAN vo2max  FIND V(out2,out3)  AT=0
+* .MEAS TRAN vo2min  FIND V(out2,out3)  AT=200u
+* .MEAS TRAN vo2f    FIND V(out2,out3)  AT=400u
+* .MEAS TRAN vi2f    FIND V(in2)    AT=400u
+* .MEAS TRAN srf1 DERIV V(out2,out3) WHEN V(out2,out3)='0.9*vo2max'
+* .MEAS TRAN srf2 DERIV V(out2,out3) WHEN V(out2,out3)=0
+* .MEAS TRAN srf3 DERIV V(out2,out3) WHEN V(out2,out3)='0.9*vo2min'
+* .MEAS TRAN srf  PARAM='(srf1+srf2+srf3)/3'
+.meas tran t12 when v(out2) = -360m rise=1
+.meas tran t22 when v(out2) = 360m rise=1
+.meas tran srf param='0.72/(t22 - t12)'
+ 
+* Choose the smaller value as slewrate measurement result
+.MEAS TRAN sr   PARAM='min(abs(srr),abs(srf))'
+
+.PRINT TRAN V(out) V(out2)
+
+.endl tran1
+
+
+**********************************
+* Transient simulation for THD
+**********************************
+.lib tran2
+
+VIN	in 0 	SIN 0 1m 1k 0
+VDD	vdd 0	half
+VSS	0 vss	half
+
+X1 inm inp out vdd vss opamp
+R1 in  inm valr1
+R2 out inm valr2
+R3 in  inp valr3
+R4 inp 0   valr4
+RL out 0   valrl
+CL out 0   valcl
+ 
+.PARAM half='psvoltage/2'
++ valr1=10k valr2=90k valr3=10k valr4=10k 
++ valrl=5k valcl=0.5n
+
+.TRAN 10n 10m START='10m-1m'
+.FOUR 1k V(out)
+
+.endl tran2

@@ -1,0 +1,65 @@
+**************************************
+* Settings for hspice
+**************************************
+
+.LIB settings
+
+* temperature *****
+* .TEMP 25.0
+*******************
+
+* options ************
+.OPTION
++   INGOLD=2
++   NUMDGT=5
++   MEASDGT=5
++   CONVERGE=1
++   DCON=1
++   POST=0
++   UNWRAP
++   STRICT_CHECK=1
++   ACOUT=1
++   SYMB=1
++   CPTIME=60
++   NOMOD
++   STATFL=1
++   MEASFORM=3
+.SAVE LEVEL = NONE
+**********************
+
+* model **********************************************************
+.INCLUDE '$DEP1_MODEL_PATH'
+******************************************************************
+
+.ENDL settings
+
+.LIB settings2
+
+* temperature *****
+* .TEMP 25.0
+*******************
+
+* options ************
+.OPTION
++   INGOLD=2
++   NUMDGT=5
++   MEASDGT=5
++   CONVERGE=1
++   DCON=1
++   POST=0
++   UNWRAP
++   STRICT_CHECK=1
++   ACOUT=1
++   SYMB=1
++   CPTIME=60
++   NOMOD
++   STATFL=1
++   MEASFORM=3
+.SAVE LEVEL = NONE
+**********************
+
+* model **********************************************************
+.LIB '$DEP4_MODEL_PATH' TT
+******************************************************************
+
+.ENDL settings2
