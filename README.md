@@ -35,7 +35,7 @@ python3 -m pip install matplotlib numpy pandas tabulate
 
 ```python
 DEP1_MODEL_PATH = BASE_DIR / "lib" / "new018.mdl"
-DEP4_MODEL_PATH = "/home/cad/PDK/PDK_520/common/data/sim/lib/spice_model/PTS06_spice_400.txt"
+DEP4_MODEL_PATH = "/home/.../model.txt"
 ```
 
 使用する環境に合わせて `DEP4_MODEL_PATH` を変更してください。指定したファイルが存在しない場合、実行できません。
