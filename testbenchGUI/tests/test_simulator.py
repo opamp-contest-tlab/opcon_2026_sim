@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import pytest
+import lib.simulator as simulator
 
 from lib.simulator import (
     EXECUTION_DIR,
@@ -195,7 +196,9 @@ def test_dep4_uses_recursive_resistor_count_with_existing_sheet_resistance():
     assert calculate_mos_area(netlist, department="dep4") == pytest.approx(1272.0)
 
 
-def test_print_performance_table_uses_english_simple_grid_and_markdown(tmp_path, capsys):
+def test_print_performance_table_uses_english_simple_grid_and_markdown(
+    tmp_path, capsys, monkeypatch
+):
     """性能表を英語の端末表とMarkdownファイルで出力する。"""
     results = {
         "const": True,
@@ -211,20 +214,46 @@ def test_print_performance_table_uses_english_simple_grid_and_markdown(tmp_path,
     }
 
     markdown_path = tmp_path / "simulation_results.md"
+    output_dir = tmp_path / "out"
+    output_dir.mkdir()
+    (output_dir / "sr_waveform.svg").write_text("<svg />", encoding="utf-8")
+    monkeypatch.setattr(simulator, "OUTPUT_DIR", output_dir)
     print_performance_table(
         results, "dep4", mos_area=10.0, markdown_path=markdown_path
     )
 
     output = capsys.readouterr().out
     assert "| Metric" not in output
-    assert "Occupied area (μm²)" in output
+    assert "Occupied area (mm²)" in output
     assert "+" in output
     assert "├" in output
     markdown = markdown_path.read_text(encoding="utf-8")
     assert "| 項目" in markdown
     assert "| ---" in markdown
-    assert "占有面積(μm²)" in markdown
+    assert "占有面積(mm²)" in markdown
     assert "1.000e-03" in markdown
+    assert "![SR波形](testbenchGUI/out/sr_waveform.svg)" in markdown
+
+
+def test_print_performance_table_applies_one_square_millimeter_area_limit(
+    tmp_path, capsys
+):
+    """占有面積1 mm²以下を制約として判定し、表に表示する。"""
+    results = {"const": True}
+
+    print_performance_table(results, "dep4", mos_area=1_000_000.0)
+    output = capsys.readouterr().out
+
+    assert "Occupied area (mm²)" in output
+    assert "<= 1 mm²" in output
+    assert "[Warning]" not in output
+    assert results["area_const"] is True
+
+    print_performance_table(results, "dep4", mos_area=1_000_000.1)
+    output = capsys.readouterr().out
+
+    assert "[Warning]" in output
+    assert results["area_const"] is False
 
 
 def test_validate_mos_geometry_rejects_inconsistent_perimeter():

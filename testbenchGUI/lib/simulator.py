@@ -18,6 +18,8 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 EXECUTION_DIR = Path(__file__).resolve().parents[1]
 OUTPUT_DIR = EXECUTION_DIR / "out"
 RESULT_MARKDOWN_PATH = PROJECT_ROOT / "simulatinon_results.md"
+UM2_PER_MM2 = 1_000_000.0
+MAX_OCCUPIED_AREA_MM2 = 1.0
 
 # 日本語などの全角文字を端末上の表示幅で計算する
 _tabulate.WIDE_CHARS_MODE = True
@@ -805,6 +807,12 @@ def print_performance_table(
         print("(An error occurred during the simulation.)")
         return
 
+    if mos_area is not None:
+        results["area_const"] = mos_area / UM2_PER_MM2 <= MAX_OCCUPIED_AREA_MM2
+        results["const"] = all(
+            results[key] for key in results if key.endswith("_const")
+        )
+
     print("Analysis results for the latest submitted circuit")
     if not results.get("const", False):
         print("[Warning] The circuit does not satisfy all constraints.")
@@ -871,8 +879,9 @@ def print_performance_table(
         row("Offset voltage (V)", si_value(results["offset"], "V"), "Absolute value <= 100 mV")
 
     row(
-        "Occupied area (μm²)",
-        f"{mos_area:.3f}" if mos_area is not None else "Unavailable",
+        "Occupied area (mm²)",
+        f"{mos_area / UM2_PER_MM2:.3e}" if mos_area is not None else "Unavailable",
+        "<= 1 mm²" if mos_area is not None else "Unavailable",
     )
     headers = ["Metric", "Value", "Requirement"]
     table_kwargs = dict(
@@ -904,7 +913,9 @@ def print_performance_table(
             "Bandwidth (Hz)": results.get("bw"),
             "Input voltage amplitude (V)": results.get("ivr"),
             "Offset voltage (V)": results.get("offset"),
-            "Occupied area (μm²)": mos_area,
+            "Occupied area (mm²)": (
+                mos_area / UM2_PER_MM2 if mos_area is not None else None
+            ),
         }
         label_map = {
             "Metric": "項目",
@@ -926,12 +937,13 @@ def print_performance_table(
             "Bandwidth (Hz)": "帯域幅(Hz)",
             "Input voltage amplitude (V)": "入力電圧振幅(V)",
             "Offset voltage (V)": "オフセット電圧(V)",
-            "Occupied area (μm²)": "占有面積(μm²)",
+            "Occupied area (mm²)": "占有面積(mm²)",
         }
         condition_map = {
             "Calculated in this analysis": "今回の解析で算出",
             "Within ±50% of the reference value": "各解析で基準値の±50%以内",
             "Absolute value <= 0.1 V": "絶対値 <= 0.1 V",
+            "<= 1 mm²": "<= 1 mm²",
         }
         markdown_rows = [
             [
@@ -957,7 +969,7 @@ def print_performance_table(
         )
         sr_image = OUTPUT_DIR / "sr_waveform.svg"
         if sr_image.exists():
-            markdown += "![SR波形](out/sr_waveform.svg)\n"
+            markdown += "![SR波形](testbenchGUI/out/sr_waveform.svg)\n"
         else:
             markdown += "SR波形画像は生成されませんでした。\n"
         Path(markdown_path).write_text(
