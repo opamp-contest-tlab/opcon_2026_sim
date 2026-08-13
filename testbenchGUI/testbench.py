@@ -11,7 +11,7 @@ os.chdir(BASE_DIR)
 # オペアンプ設計コンテストのホームページから入手できるので任意の場所に配置し、ここでPATHを定義する
 DEP1_MODEL_PATH = BASE_DIR / "lib" / "new018.mdl"
 # 試作の部に参加したであれば、フェニテック社のモデルファイルを入手しているはずなので、それまでPATHを定義する
-DEP4_MODEL_PATH = "/home/.../model.txt"
+DEP4_MODEL_PATH = "/home/cad/PDK/PDK_520/common/data/sim/lib/spice_model/PTS06_spice_400.txt"
 
 
 def resolve_model_path(model_path, name):
@@ -28,12 +28,16 @@ def resolve_model_path(model_path, name):
     return path
 
 
-dep1_model_path = resolve_model_path(DEP1_MODEL_PATH, "DEP1_MODEL_PATH")
-dep4_model_path = resolve_model_path(DEP4_MODEL_PATH, "DEP4_MODEL_PATH")
-
-# HSPICEから参照できる環境変数として設定する。
-os.environ["DEP1_MODEL_PATH"] = str(dep1_model_path)
-os.environ["DEP4_MODEL_PATH"] = str(dep4_model_path)
+def configure_model_path(department):
+    """指定された部門で使用するモデルファイルだけを検証して設定する。"""
+    if department in {"dep1", "dep2", "dep3"}:
+        model_path = resolve_model_path(DEP1_MODEL_PATH, "DEP1_MODEL_PATH")
+        os.environ["DEP1_MODEL_PATH"] = str(model_path)
+    elif department == "dep4":
+        model_path = resolve_model_path(DEP4_MODEL_PATH, "DEP4_MODEL_PATH")
+        os.environ["DEP4_MODEL_PATH"] = str(model_path)
+    else:
+        raise ValueError(f"未知のシミュレーション部門です: {department}")
 
 def main():
     parser = argparse.ArgumentParser(
@@ -47,6 +51,8 @@ def main():
         help="シミュレーション部門 (既定値: dep1)",
     )
     args = parser.parse_args()
+
+    configure_model_path(args.department)
 
     from lib.simulator import simulate_and_print
     simulate_and_print(args.department)

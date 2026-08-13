@@ -1,91 +1,73 @@
 # オペアンプ設計コンテスト評価システム
 
-`testbenchGUI` にあるネットリストを HSPICE でシミュレーションし、各部門の性能と FOM（Figure of Merit）を表示するプログラムです。
+`testbenchGUI` にあるネットリストを HSPICE でシミュレーションし、指定した部門の性能、制約条件、FOM（Figure of Merit）を表示するプログラムです。
 
 ## 実行条件
 
 ### 必須ソフトウェア
 
 - Python 3.11 以上
-- HSPICE（`hspice` コマンドを実行できること）
+- HSPICE（`hspice` コマンドを PATH から実行できること）
 
 ### Python パッケージ
-
-次のパッケージをインストールしてください。
 
 ```bash
 python3 -m pip install matplotlib numpy pandas tabulate
 ```
 
-### 必要なファイル
+テストを実行する場合は、追加で `pytest` が必要です。
 
-次のファイル・ディレクトリが必要です。
-
-- `testbenchGUI/opamp.sp`：評価対象のオペアンプネットリスト
-- `testbenchGUI/sim1.sp`〜`sim3.sp`：HSPICE の解析用ネットリスト
-- `testbenchGUI/lib/`：解析用ライブラリと MOSFET モデル
-- `testbenchGUI/testbench.py`
-- `testbenchGUI/lib/simulator.py`
-
-`opamp.sp` には、評価対象となる `.subckt opamp ... .ends opamp` の定義を記述してください。
-
-### MOSFET モデル
-
-`testbenchGUI/testbench.py` の次の設定でモデルファイルの場所を指定します。
-
-```python
-DEP1_MODEL_PATH = BASE_DIR / "lib" / "new018.mdl"
-DEP4_MODEL_PATH = "/home/.../model.txt"
+```bash
+python3 -m pip install pytest
 ```
 
-使用する環境に合わせて `DEP4_MODEL_PATH` を変更してください。指定したファイルが存在しない場合、実行できません。
+## 準備
 
-また、HSPICE が使用するモデルに合わせて `testbenchGUI/lib/settings.lib` の設定も確認してください。
+評価対象の回路を `testbenchGUI/opamp.sp` に、次の形式で記述してください。
+
+```spice
+.subckt opamp ...
+...
+.ends opamp
+```
+
+部門1〜3では `testbenchGUI/lib/new018.mdl` を MOSFET モデルとして使用します。部門4を実行する場合は、別途入手したモデルファイルを任意の場所に配置し、`testbenchGUI/testbench.py` の `DEP4_MODEL_PATH` を環境に合わせて変更してください。
+
+```python
+DEP1_MODEL_PATH = BASE_DIR / "lib" / "<モデルファイル>"
+DEP4_MODEL_PATH = "/path/to/<モデルファイル>"
+```
+
+モデルファイルのパスは環境ごとに異なるため、実際の配置先に置き換えてください。指定したファイルが存在しない場合、その部門は実行できません。HSPICE のモデル定義と `testbenchGUI/lib/settings.lib` の参照方法が一致していることも確認してください。
 
 ## 実行方法
 
-プロジェクトのルートディレクトリから `testbenchGUI` へ移動し、部門を引数に指定して実行します。
+プロジェクトのルートディレクトリから、次のように実行します。`testbench.py` が内部で `testbenchGUI` を作業ディレクトリに設定するため、移動は不要です。
 
 ```bash
-cd testbenchGUI
-python3 testbench.py dep1
+python3 testbenchGUI/testbench.py dep1
 ```
 
-指定できる部門は `dep1`、`dep2`、`dep3`、`dep4` です。
+指定できる部門は `dep1`、`dep2`、`dep3`、`dep4` です。部門を省略した場合は `dep1` が使用されます。
 
 ```bash
-python3 testbench.py dep1
-python3 testbench.py dep2
-python3 testbench.py dep3
-python3 testbench.py dep4
-```
-
-部門を省略した場合は `dep1` が使用されます。
-
-```bash
-python3 testbench.py
+python3 testbenchGUI/testbench.py dep2
+python3 testbenchGUI/testbench.py dep3
+python3 testbenchGUI/testbench.py dep4
+python3 testbenchGUI/testbench.py
 ```
 
 ## 実行時の処理
 
-1. `opamp.sp` を読み込みます。
-2. `process_netlist()` により、部門に応じた MOSFET の `ad`、`as`、`pd`、`ps` パラメータを付加・更新します。
-3. 処理後のネットリストを一時ファイル `tmp.sp` として作成します。
-4. 部門1〜3では `sim1.sp` と `sim2.sp`、部門4では `sim3.sp` を HSPICE で実行します。
-5. 解析結果、制約条件、実行部門のスコアを表示します。
-6. 算出可能な `FOM (dep1)`〜`FOM (dep4)` を表示します。今回の解析で算出できない FOM は `-` になります。
+1. `opamp.sp` を読み込み、部門に応じて MOSFET の `ad`、`as`、`pd`、`ps` パラメータを付加・更新します。
+2. 処理後のネットリストを一時ファイル `tmp.sp` として作成します。
+3. 部門1〜3では `sim1.sp` と `sim2.sp`、部門4では `sim3.sp` を HSPICE で実行します。
+4. 解析結果を端末に表示し、算出可能な `FOM (dep1)`〜`FOM (dep4)` を出力します。今回の解析で算出できない FOM は `-` になります。
+5. 回路面積を計算し、波形プロットと性能表を保存します。
 
-`tmp.sp` や HSPICE の結果ファイルはシミュレーション終了時に削除されます。解析用の波形プロットは `out/` に保存されます。
+実行のたびに `testbenchGUI/out/` は初期化されます。生成される主なファイルは次のとおりです。
 
-## 実行結果の例
+- `testbenchGUI/out/`：解析用の PDF/SVG 波形プロット
+- `simulatinon_results.md`：性能表と SR 波形プレビュー（プロジェクトルート）
 
-正常に実行されると、性能表に次のような項目が表示されます。
-
-```text
-FOM (dep1)
-FOM (dep2)
-FOM (dep3)
-FOM (dep4)
-```
-
-HSPICE が見つからない場合は、`hspice` コマンドが PATH に登録されているか確認してください。
+`tmp.sp`、`for_sr.lib`、HSPICE の `.lis`・測定 CSV などの一時ファイルは、シミュレーション終了時に削除されます。HSPICE が見つからない場合は、`hspice` コマンドが PATH に登録されているか、また HSPICE の実行ライセンスが利用可能か確認してください。

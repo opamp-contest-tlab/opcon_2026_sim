@@ -2,15 +2,88 @@
 # from IPython.display import display, clear_output, HTML
 from pathlib import Path
 from decimal import Decimal
+import ast
+import os
+import sys
+import traceback
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import time, subprocess, re, math, os
+import time, subprocess, re, math
 import tabulate as _tabulate
+
+# 最終結果の Markdown はプロジェクトルートへ保存する。
+# 波形画像の out/ は従来どおり実行ディレクトリに保存する。
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+EXECUTION_DIR = Path(__file__).resolve().parents[1]
+OUTPUT_DIR = EXECUTION_DIR / "out"
+RESULT_MARKDOWN_PATH = PROJECT_ROOT / "simulatinon_results.md"
 
 # 日本語などの全角文字を端末上の表示幅で計算する
 _tabulate.WIDE_CHARS_MODE = True
 tabulate = _tabulate.tabulate
+
+
+def _debug_enabled(debug=None):
+    """デバッグモードが有効かを返す。環境変数でも切り替えられる。"""
+    if debug is not None:
+        return debug
+    return os.environ.get("SIMULATOR_DEBUG", "").lower() in {
+        "1", "true", "yes", "on"
+    }
+
+
+def _debug_exception(context, error, debug=False):
+    """デバッグ時に例外の発生関数・行番号・トレースバックを表示する。"""
+    if not debug:
+        return
+
+    traceback_frames = traceback.extract_tb(error.__traceback__)
+    if traceback_frames:
+        frame = traceback_frames[-1]
+        location = f"{frame.name} ({frame.filename}:{frame.lineno})"
+    else:
+        location = "発生箇所を特定できません"
+    print(f"[DEBUG] {context}: {location}", file=sys.stderr)
+    traceback.print_exception(type(error), error, error.__traceback__, file=sys.stderr)
+
+
+def _debug_subprocess_result(result, debug=False):
+    """デバッグ時にHSPICEの終了コードと出力を表示する。"""
+    if not debug:
+        return
+    stdout = result.stdout.decode(errors="replace") if isinstance(result.stdout, bytes) else result.stdout
+    stderr = result.stderr.decode(errors="replace") if isinstance(result.stderr, bytes) else result.stderr
+    print(f"[DEBUG] HSPICE returncode: {result.returncode}", file=sys.stderr)
+    if stdout:
+        print(f"[DEBUG] HSPICE stdout:\n{stdout}", file=sys.stderr)
+    if stderr:
+        print(f"[DEBUG] HSPICE stderr:\n{stderr}", file=sys.stderr)
+
+
+def _print_hspice_error(result, output_file):
+    """HSPICE異常終了時に、標準出力・標準エラー・.lisを表示する。"""
+    if result.returncode == 0:
+        return
+
+    print(f"HSPICE error (exit code: {result.returncode})")
+    messages = []
+    for label, stream in (("stdout", result.stdout), ("stderr", result.stderr)):
+        if isinstance(stream, bytes):
+            stream = stream.decode(errors="replace")
+        if stream:
+            messages.append(f"[HSPICE {label}]\n{stream.rstrip()}")
+
+    output_path = Path(output_file)
+    if output_path.exists():
+        lis_text = output_path.read_text(encoding="utf-8", errors="ignore")
+        if lis_text:
+            messages.append(f"[HSPICE出力: {output_path}]\n{lis_text.rstrip()}")
+
+    if messages:
+        print("\n\n".join(messages))
+    else:
+        print("HSPICE did not return an error message.")
 # matplotlibの設定
 plt.rcParams["font.family"] = 'Nimbus Roman'
 plt.rcParams['xtick.direction'] = 'in'  # 内向き
@@ -42,8 +115,8 @@ def process_netlist(netlist_text, department):
                 # 値生成
                 ad_val = f"{w_val}*{tmp}"
                 as_val = f"{w_val}*{tmp}"
-                pd_val = f"({w_val}+{tmp})*2"
-                ps_val = f"({w_val}+{tmp})*2"
+                pd_val = f"{w_val}+{tmp}*2"
+                ps_val = f"{w_val}+{tmp}*2"
 
                 # 既存の ad/as/pd/ps を削除してから追加する
                 line = re.sub(r"\bad\s*=\s*[^ ]+", "", line)
@@ -63,6 +136,259 @@ def process_netlist(netlist_text, department):
         processed_lines.append(line)
 
     return "\n".join(processed_lines)
+
+
+_SPICE_SCALE = {
+    "t": 1e12,
+    "g": 1e9,
+    "meg": 1e6,
+    "k": 1e3,
+    "m": 1e-3,
+    "u": 1e-6,
+    "n": 1e-9,
+    "p": 1e-12,
+    "f": 1e-15,
+}
+
+
+def _spice_value(value, parameters):
+    """SPICE の数値、単位、パラメータ、加減乗除式を安全に評価する。"""
+    expression = value.strip().strip("'\"").lower()
+    expression = re.sub(
+        r"((?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?)(meg|[tgkmunpf])",
+        lambda match: str(float(match.group(1)) * _SPICE_SCALE[match.group(2)]),
+        expression,
+    )
+
+    tree = ast.parse(expression, mode="eval")
+
+    def evaluate(node):
+        if isinstance(node, ast.Expression):
+            return evaluate(node.body)
+        if isinstance(node, ast.Constant) and isinstance(node.value, (int, float)):
+            return float(node.value)
+        if isinstance(node, ast.Name) and node.id in parameters:
+            return parameters[node.id]
+        if isinstance(node, ast.UnaryOp) and isinstance(node.op, (ast.UAdd, ast.USub)):
+            operand = evaluate(node.operand)
+            return operand if isinstance(node.op, ast.UAdd) else -operand
+        if isinstance(node, ast.BinOp) and isinstance(
+            node.op, (ast.Add, ast.Sub, ast.Mult, ast.Div)
+        ):
+            left, right = evaluate(node.left), evaluate(node.right)
+            if isinstance(node.op, ast.Add):
+                return left + right
+            if isinstance(node.op, ast.Sub):
+                return left - right
+            if isinstance(node.op, ast.Mult):
+                return left * right
+            return left / right
+        raise ValueError(f"Unsupported SPICE expression: {value}")
+
+    return evaluate(tree)
+
+
+def _read_netlist_parameters(netlist_text):
+    """.PARAM の単一行・継続行を読み込み、数値パラメータを返す。"""
+    parameters = {}
+    in_param_block = False
+    for raw_line in netlist_text.splitlines():
+        line = raw_line.split("$", 1)[0].strip()
+        if not line:
+            continue
+        if line.lower().startswith(".param"):
+            in_param_block = True
+            param_text = line[6:].strip()
+        elif in_param_block and line.startswith("+"):
+            param_text = line[1:].strip()
+        else:
+            in_param_block = False
+            continue
+
+        assignments = re.findall(
+            r"([A-Za-z_]\w*)\s*=\s*('[^']+'|\"[^\"]+\"|[^\s]+)",
+            param_text,
+            flags=re.IGNORECASE,
+        )
+        for name, value in assignments:
+            parameters[name.lower()] = _spice_value(value, parameters)
+    return parameters
+
+
+def _extract_mos_geometry(netlist_text):
+    """opamp サブサーキット内の MOS 寸法を SI 単位で抽出する。"""
+    parameters = _read_netlist_parameters(netlist_text)
+    geometry = []
+    in_opamp = False
+    for raw_line in netlist_text.splitlines():
+        line = raw_line.split("$", 1)[0].strip()
+        lower = line.lower()
+        if re.match(r"\.subckt\s+opamp(?:\s|$)", lower):
+            in_opamp = True
+            continue
+        if in_opamp and re.match(r"\.ends(?:\s+opamp)?(?:\s|$)", lower):
+            break
+        if not in_opamp or not re.match(r"m\S*\s", line, re.IGNORECASE):
+            continue
+
+        values = {}
+        for name in ("l", "w", "m", "ad", "as", "pd", "ps"):
+            match = re.search(
+                rf"\b{name}\s*=\s*('[^']+'|\"[^\"]+\"|[^\s]+)",
+                line,
+                re.IGNORECASE,
+            )
+            if match:
+                values[name] = _spice_value(match.group(1), parameters)
+        if "l" in values and "w" in values:
+            values["name"] = line.split()[0]
+            geometry.append(values)
+    return geometry
+
+
+def _extract_dep4_passive_values(netlist_text):
+    """部門4の opamp サブサーキット内にある抵抗・容量値を抽出する。"""
+    parameters = _read_netlist_parameters(netlist_text)
+    values = {"resistance": [], "capacitance": []}
+    in_opamp = False
+    for raw_line in netlist_text.splitlines():
+        line = raw_line.split("$", 1)[0].strip()
+        lower = line.lower()
+        if re.match(r"\.subckt\s+opamp(?:\s|$)", lower):
+            in_opamp = True
+            continue
+        if in_opamp and re.match(r"\.ends(?:\s+opamp)?(?:\s|$)", lower):
+            break
+        if not in_opamp or not line or line.startswith("*"):
+            continue
+
+        tokens = line.split()
+        if len(tokens) < 4 or tokens[0][0].upper() not in {"R", "C"}:
+            continue
+        try:
+            component_value = _spice_value(tokens[3], parameters)
+        except (SyntaxError, ValueError, ZeroDivisionError):
+            continue
+        key = "resistance" if tokens[0][0].upper() == "R" else "capacitance"
+        values[key].append(component_value)
+    return values
+
+
+_RESISTOR_PARALLEL_COUNTS = (1, 2, 5, 10, 50)
+_DEP4_RESISTOR_PARALLEL_COUNTS = (1, 2, 5, 10, 50, 100, 200, 1000)
+
+
+def _resistor_unit_stages(unit_resistance, parallel_counts=_RESISTOR_PARALLEL_COUNTS):
+    """単位抵抗値から、直列・並列構成の各段階を生成する。"""
+    return tuple(
+        (unit_resistance / parallel_count, parallel_count)
+        for parallel_count in parallel_counts
+    )
+
+
+def _unit_resistor_count(
+    resistance,
+    unit_resistance=50.0,
+    parallel_counts=_RESISTOR_PARALLEL_COUNTS,
+    stage_index=0,
+):
+    """抵抗値を、指定した単位抵抗の個数へ再帰的に換算する。
+
+    各段階で抵抗値を基準抵抗と余りに分解し、商に対応する単位抵抗数を
+    加算する。並列数は ``parallel_counts`` で指定する。
+    """
+    if resistance <= 0:
+        return 0
+    stages = _resistor_unit_stages(unit_resistance, parallel_counts)
+    if stage_index == len(stages):
+        # 最小段階より小さい値は、目標抵抗値以下になるよう並列数を切り上げる。
+        return math.ceil(unit_resistance / resistance)
+
+    stage_resistance, stage_count = stages[stage_index]
+    quotient, remainder = divmod(resistance, stage_resistance)
+    if math.isclose(remainder, 0.0, rel_tol=1e-9, abs_tol=1e-9):
+        remainder = 0.0
+    return int(quotient) * stage_count + _unit_resistor_count(
+        remainder, unit_resistance, parallel_counts, stage_index + 1
+    )
+
+
+def calculate_mos_area(netlist_text, department="dep1"):
+    """指定部門の回路面積を um^2 で返す。
+
+    AD/AS がない部門1〜3の MOS は、拡散幅 0.6um として補完する。
+    PD/PS は ``W + 2 * 0.6um`` となるが、面積計算には AD/AS のみを使う。
+    部門1〜3は抵抗を50Ω単位抵抗（0.4um×0.4um）、容量を
+    1fF/um^2 に換算して加算する。
+    部門4は MOS・抵抗・容量を部門4固有の換算式で計算する。
+    """
+    area_m2 = 0.0
+    for values in _extract_mos_geometry(netlist_text):
+        multiplier = values.get("m", 1.0)
+        if department == "dep4":
+            # 部門4: MOS = W * (L * 2um)
+            # W/L は SI 単位で抽出済みなので、2um幅の面積として加算する。
+            area_m2 += values["w"] * values["l"] * 2 * multiplier
+            continue
+        diffusion_area = values.get("ad", 0.0) + values.get("as", 0.0)
+        if department in {"dep1", "dep2", "dep3"}:
+            diffusion_area += sum(
+                values["w"] * 0.6e-6
+                for key in ("ad", "as")
+                if key not in values
+            )
+        area_m2 += values["w"] * values["l"] * multiplier
+        area_m2 += diffusion_area * multiplier
+    if department == "dep4":
+        passive_values = _extract_dep4_passive_values(netlist_text)
+        area_um2 = area_m2 / 1e-12
+        area_um2 += sum(passive_values["capacitance"]) / 3e-15
+        area_um2 += sum(
+            _unit_resistor_count(
+                resistance,
+                unit_resistance=1e3,
+                parallel_counts=_DEP4_RESISTOR_PARALLEL_COUNTS,
+            )
+            * 4
+            for resistance in passive_values["resistance"]
+        )
+        return area_um2
+    area_um2 = area_m2 / 1e-12
+    if department in {"dep1", "dep2", "dep3"}:
+        passive_values = _extract_dep4_passive_values(netlist_text)
+        area_um2 += sum(
+            _unit_resistor_count(resistance) * 0.4 * 0.4
+            for resistance in passive_values["resistance"]
+        )
+        area_um2 += sum(passive_values["capacitance"]) / 1e-15
+    return area_um2
+
+
+def validate_mos_geometry(netlist_text, tolerance=1e-9):
+    """PD/PS と AD/AS が矩形拡散形状として整合するか検証する。
+
+    既存のネットリストが使う形状 ``A = W*x, P = W+2*x`` を検証する。
+    寸法が欠落している MOS は検証不能として False を返す。
+    """
+    for values in _extract_mos_geometry(netlist_text):
+        required = ("ad", "as", "pd", "ps")
+        if not all(key in values for key in required):
+            return False
+        expected_ad = values["w"] * (values["pd"] - values["w"]) / 2
+        expected_as = values["w"] * (values["ps"] - values["w"]) / 2
+        scale = max(values["ad"], values["as"], 1e-30)
+        if abs(expected_ad - values["ad"]) > tolerance * scale:
+            return False
+        if abs(expected_as - values["as"]) > tolerance * scale:
+            return False
+    return True
+
+
+def calculate_mos_area_from_file(source_file="./opamp.sp", department="dep1"):
+    """opamp.sp を読み込み、MOS 面積 (um^2) を計算する。"""
+    return calculate_mos_area(
+        Path(source_file).read_text(encoding="utf-8"), department=department
+    )
 
 # =========================================
 # 共通：.lis からテーブルを抜き出す関数
@@ -167,8 +493,8 @@ def plot_ac2_gain_phase(block):
     ax2.set_zorder(10)
     ax1.patch.set_visible(False)
     plt.tight_layout()
-    plt.savefig("out/ac2_gain_phase.pdf", transparent=True)
-    plt.savefig("out/ac2_gain_phase.svg", transparent=True)
+    plt.savefig(OUTPUT_DIR / "ac2_gain_phase.pdf", transparent=True)
+    plt.savefig(OUTPUT_DIR / "ac2_gain_phase.svg", transparent=True)
     plt.title("Gain & Phase")
     # plt.show()
     plt.close()
@@ -195,8 +521,8 @@ def plot_ac4_cmrr(block):
     plt.xlim(min(freq), max(freq))
     plt.legend()
     plt.tight_layout()
-    plt.savefig("out/ac4_cmrr.pdf", transparent=True)
-    plt.savefig("out/ac4_cmrr.svg", transparent=True)
+    plt.savefig(OUTPUT_DIR / "ac4_cmrr.pdf", transparent=True)
+    plt.savefig(OUTPUT_DIR / "ac4_cmrr.svg", transparent=True)
     plt.title("CMRR")
     # plt.show()
     plt.close()
@@ -227,8 +553,8 @@ def plot_ac5_psrr(block):
     plt.xlim(min(freq), max(freq))
     plt.legend()
     plt.tight_layout()
-    plt.savefig("out/ac5_psrr.pdf", transparent=True)
-    plt.savefig("out/ac5_psrr.svg", transparent=True)
+    plt.savefig(OUTPUT_DIR / "ac5_psrr.pdf", transparent=True)
+    plt.savefig(OUTPUT_DIR / "ac5_psrr.svg", transparent=True)
     plt.title("PSRR")
     # plt.show()
     plt.close()
@@ -255,8 +581,8 @@ def plot_dc_sweep1(block):
     plt.grid(True, which="both", linestyle=':')
     plt.legend()
     plt.tight_layout()
-    plt.savefig("out/dc2_input_range.pdf", transparent=True)
-    plt.savefig("out/dc2_input_range.svg", transparent=True)
+    plt.savefig(OUTPUT_DIR / "dc2_input_range.pdf", transparent=True)
+    plt.savefig(OUTPUT_DIR / "dc2_input_range.svg", transparent=True)
     plt.title('Input Voltage Range')
     # plt.show()
     plt.close()
@@ -282,8 +608,8 @@ def plot_dc_sweep2(block):
     plt.grid(True, which="both", linestyle=':')
     plt.legend()
     plt.tight_layout()
-    plt.savefig("out/dc3_output_range.pdf", transparent=True)
-    plt.savefig("out/dc3_output_range.svg", transparent=True)
+    plt.savefig(OUTPUT_DIR / "dc3_output_range.pdf", transparent=True)
+    plt.savefig(OUTPUT_DIR / "dc3_output_range.svg", transparent=True)
     plt.title('Output Voltage Range')
     # plt.show()
     plt.close()
@@ -309,8 +635,8 @@ def plot_dc_sweep3(block):
     plt.grid(True, which="both", linestyle=':')
     plt.legend()
     plt.tight_layout()
-    plt.savefig("out/dc3_input_range.pdf", transparent=True)
-    plt.savefig("out/dc3_input_range.svg", transparent=True)
+    plt.savefig(OUTPUT_DIR / "dc3_input_range.pdf", transparent=True)
+    plt.savefig(OUTPUT_DIR / "dc3_input_range.svg", transparent=True)
     plt.title('Output Voltage Range')
     # plt.show()
     plt.close()
@@ -333,8 +659,8 @@ def plot_sr(block):
     plt.grid(True, which="both", linestyle=':')
     plt.legend()
     plt.tight_layout()
-    plt.savefig("out/sr_waveform.pdf", transparent=True)
-    plt.savefig("out/sr_waveform.svg", transparent=True)
+    plt.savefig(OUTPUT_DIR / "sr_waveform.pdf", transparent=True)
+    plt.savefig(OUTPUT_DIR / "sr_waveform.svg", transparent=True)
     plt.title('Slew Rate')
     # plt.show()
     plt.close()
@@ -355,8 +681,8 @@ def plot_sr2(block):
     plt.grid(True, which="both", linestyle=':')
     plt.legend()
     plt.tight_layout()
-    plt.savefig("out/sr_waveform.pdf", transparent=True)
-    plt.savefig("out/sr_waveform.svg", transparent=True)
+    plt.savefig(OUTPUT_DIR / "sr_waveform.pdf", transparent=True)
+    plt.savefig(OUTPUT_DIR / "sr_waveform.svg", transparent=True)
     plt.title('Slew Rate')
     # plt.show()
     plt.close()
@@ -370,8 +696,8 @@ def plot_sr2(block):
     plt.grid(True, which="both", linestyle=':')
     plt.legend()
     plt.tight_layout()
-    plt.savefig("out/sr_waveform2.pdf", transparent=True)
-    plt.savefig("out/sr_waveform2.svg", transparent=True)
+    plt.savefig(OUTPUT_DIR / "sr_waveform2.pdf", transparent=True)
+    plt.savefig(OUTPUT_DIR / "sr_waveform2.svg", transparent=True)
     plt.title('Slew Rate (Detailed View)')
     # plt.show()
     plt.close()
@@ -381,43 +707,43 @@ def plot_dep1_3():
     """
     部門1-3の結果プロットを一括実行する関数
     """
-    with open("result1.lis", "r", encoding="utf-8", errors="ignore") as f:
-        lines = f.read().splitlines()
+    # with open("result1.lis", "r", encoding="utf-8", errors="ignore") as f:
+    #     lines = f.read().splitlines()
 
-    # ac2: 利得・位相余裕
-    ac2_block = parse_table_from_lis(lines, label="ac2", header_token="freq")
-    if ac2_block:
-        plot_ac2_gain_phase(ac2_block)
-    else:
-        print("ac2 のデータが見つかりませんでした。")
+    # # ac2: 利得・位相余裕
+    # ac2_block = parse_table_from_lis(lines, label="ac2", header_token="freq")
+    # if ac2_block:
+    #     plot_ac2_gain_phase(ac2_block)
+    # else:
+    #     print("ac2 のデータが見つかりませんでした。")
 
-    # ac4: CMRR
-    ac4_block = parse_table_from_lis(lines, label="ac4", header_token="freq")
-    if ac4_block:
-        plot_ac4_cmrr(ac4_block)
-    else:
-        print("ac4 (CMRR) のデータが見つかりませんでした。")
+    # # ac4: CMRR
+    # ac4_block = parse_table_from_lis(lines, label="ac4", header_token="freq")
+    # if ac4_block:
+    #     plot_ac4_cmrr(ac4_block)
+    # else:
+    #     print("ac4 (CMRR) のデータが見つかりませんでした。")
 
-    # ac5: PSRR（電源ライン上下）
-    ac5_block = parse_table_from_lis(lines, label="ac5", header_token="freq")
-    if ac5_block:
-        plot_ac5_psrr(ac5_block)
-    else:
-        print("ac5 (PSRR) のデータが見つかりませんでした。")
+    # # ac5: PSRR（電源ライン上下）
+    # ac5_block = parse_table_from_lis(lines, label="ac5", header_token="freq")
+    # if ac5_block:
+    #     plot_ac5_psrr(ac5_block)
+    # else:
+    #     print("ac5 (PSRR) のデータが見つかりませんでした。")
 
-    # dc2: DCスイープ
-    dc2_block = parse_table_from_lis(lines, label="dc2", header_token="volt")
-    if dc2_block:
-        plot_dc_sweep1(dc2_block)
-    else:
-        print("dc2 のデータが見つかりませんでした。")
+    # # dc2: DCスイープ
+    # dc2_block = parse_table_from_lis(lines, label="dc2", header_token="volt")
+    # if dc2_block:
+    #     plot_dc_sweep1(dc2_block)
+    # else:
+    #     print("dc2 のデータが見つかりませんでした。")
 
-    # dc3: DCスイープその2
-    dc3_block = parse_table_from_lis(lines, label="dc3", header_token="volt")
-    if dc3_block:
-        plot_dc_sweep2(dc3_block)
-    else:
-        print("dc3 のデータが見つかりませんでした。")
+    # # dc3: DCスイープその2
+    # dc3_block = parse_table_from_lis(lines, label="dc3", header_token="volt")
+    # if dc3_block:
+    #     plot_dc_sweep2(dc3_block)
+    # else:
+    #     print("dc3 のデータが見つかりませんでした。")
 
     # sr: スルーレート (別ファイル)
     with open('result2.lis', "r", encoding="utf-8", errors="ignore") as f:
@@ -427,106 +753,220 @@ def plot_dep1_3():
     if sr_block:
         plot_sr(sr_block)
     else:
-        print("sr のデータが見つかりませんでした。")
+        print("SR data was not found.")
 
 def plot_dep4():
     """
     部門4の結果プロットを一括実行する関数
     """
-    with open("result1.lis", "r", encoding="utf-8", errors="ignore") as f:
-        lines = f.read().splitlines()
+    # with open("result1.lis", "r", encoding="utf-8", errors="ignore") as f:
+    #     lines = f.read().splitlines()
 
-    # ac1: 利得・位相余裕
-    ac1_block = parse_table_from_lis(lines, label="ac1", header_token="freq")
-    if ac1_block:
-        plot_ac2_gain_phase(ac1_block)
-    else:
-        print("ac1 のデータが見つかりませんでした。")
+    # # ac1: 利得・位相余裕
+    # ac1_block = parse_table_from_lis(lines, label="ac1", header_token="freq")
+    # if ac1_block:
+    #     plot_ac2_gain_phase(ac1_block)
+    # else:
+    #     print("ac1 のデータが見つかりませんでした。")
 
-    # ac2: 帯域幅
-    ac2_block = parse_table_from_lis(lines, label="ac2", header_token="freq")
-    if ac2_block:
-        plot_ac2_gain_phase(ac2_block)
-    else:
-        print("ac2 のデータが見つかりませんでした。")
+    # # ac2: 帯域幅
+    # ac2_block = parse_table_from_lis(lines, label="ac2", header_token="freq")
+    # if ac2_block:
+    #     plot_ac2_gain_phase(ac2_block)
+    # else:
+    #     print("ac2 のデータが見つかりませんでした。")
 
-    # dc2: 入力電圧範囲
-    dc2_block = parse_table_from_lis(lines, label="dc2", header_token="volt")
-    if dc2_block:
-        plot_dc_sweep3(dc2_block)
-    else:
-        print("dc2 のデータが見つかりませんでした。")
+    # # dc2: 入力電圧範囲
+    # dc2_block = parse_table_from_lis(lines, label="dc2", header_token="volt")
+    # if dc2_block:
+    #     plot_dc_sweep3(dc2_block)
+    # else:
+    #     print("dc2 のデータが見つかりませんでした。")
 
     # tran1: スルーレート
     tran1_block = parse_table_from_lis(lines, label="tran1", header_token="time")
     if tran1_block:
         plot_sr2(tran1_block)
     else:
-        print("tran1 のデータが見つかりませんでした。")
+        print("TRAN1 data was not found.")
 
 
-def print_performance_table(results, sim_type, psvoltage=None, error_flag=False):
-    """シミュレーション結果の性能表を標準出力へ表示する。"""
+def print_performance_table(
+    results,
+    sim_type,
+    psvoltage=None,
+    error_flag=False,
+    mos_area=None,
+    markdown_path=None,
+):
+    """シミュレーション結果を英語の端末表とMarkdownで出力する。"""
     if error_flag:
-        print("この回路は演算増幅器として動作していません。")
-        print("(シミュレーション中にエラーが発生しました。)")
+        print("This circuit does not operate as an operational amplifier.")
+        print("(An error occurred during the simulation.)")
         return
 
-    print("最後に提出した回路の解析結果")
+    print("Analysis results for the latest submitted circuit")
     if not results.get("const", False):
-        print("[警告] 制約条件を満たしていません。")
+        print("[Warning] The circuit does not satisfy all constraints.")
 
     rows = []
+
+    def si_value(value, unit, decimals=3):
+        """数値をSI接頭語付きの工学記法で表示する。"""
+        prefixes = (
+            (1e9, "G"),
+            (1e6, "M"),
+            (1e3, "k"),
+            (1.0, ""),
+            (1e-3, "m"),
+            (1e-6, "u"),
+            (1e-9, "n"),
+            (1e-12, "p"),
+        )
+        if value == 0:
+            return f"{value:.{decimals}f} {unit}"
+        magnitude = abs(value)
+        scale, prefix = next(
+            (scale, prefix)
+            for scale, prefix in prefixes
+            if magnitude >= scale
+        )
+        return f"{value / scale:.{decimals}f} {prefix}{unit}"
 
     def row(label, value, condition="-"):
         rows.append([label, value, condition])
 
-    # row("スコア", f"{results[f'fom{sim_type}']:.3e}")
     for department in ("dep1", "dep2", "dep3", "dep4"):
         fom = results.get(f"fom{department}")
         row(
             f"FOM ({department})",
             f"{fom:.3e}" if fom is not None else "-",
-            "今回の解析で算出",
+            "Calculated in this analysis",
         )
     if sim_type in ["dep1", "dep2", "dep3"]:
-        row("電源電圧(V)", f"{psvoltage:.3f}")
-        row("消費電流(A)", f"{results['ib']:.8f}", "各解析で基準値の±50%以内")
-        row("消費電力(W)", f"{results['pdis']:.7f}", "<= 0.1 W")
-        row("出力抵抗(Ohm)", f"{results['ro']:.3e}")
-        row("直流利得(dB)", f"{results['dcgain_db']:.2f}", ">= 40 dB")
-        row("位相余裕(deg)", f"{results['pm']:.2f}", ">= 45 deg")
-        row("利得帯域幅積(Hz)", f"{results['gbw']:.3e}", ">= 1.000e+06 Hz")
-        row("入力換算雑音(V)", f"{results['irn']:.6f}")
-        row("スルーレート(V/s)", f"{results['sr']:.3e}", ">= 1.000e+05 V/s")
-        row("全高調波歪(%)", f"{results['thd']:.4f}", "<= 1.0 %")
-        row("同相除去比(dB)", f"{results['cmrr_db']:.2f}", ">= 40 dB")
-        row("電源電圧変動除去比(dB)", f"{results['psrr_db']:.2f}", ">= 40 dB")
-        row("同相入力範囲(%)", f"{results['cmir']:.2f}", ">= 5.0 %")
-        row("出力電圧範囲(%)", f"{results['ovr']:.2f}", ">= 5.0 %")
+        row("Supply voltage (V)", si_value(psvoltage, "V"))
+        row("Supply current (A)", si_value(results["ib"], "A"), "Within ±50% of the reference value")
+        row("Power consumption (W)", si_value(results["pdis"], "W"), "<= 100 mW")
+        row("Output resistance (Ω)", si_value(results["ro"], "Ω"))
+        row("DC gain (dB)", f"{results['dcgain_db']:.2f}", ">= 40 dB")
+        row("Phase margin (deg)", f"{results['pm']:.2f}", ">= 45 deg")
+        row("Gain-bandwidth product (Hz)", si_value(results["gbw"], "Hz"), ">= 1 MHz")
+        row("Input-referred noise (V)", si_value(results["irn"], "V"))
+        row("Slew rate (V/s)", si_value(results["sr"], "V/s"), ">= 100 kV/s")
+        row("Total harmonic distortion (%)", f"{results['thd']:.4f}", "<= 1.0 %")
+        row("Common-mode rejection ratio (dB)", f"{results['cmrr_db']:.2f}", ">= 40 dB")
+        row("Power-supply rejection ratio (dB)", f"{results['psrr_db']:.2f}", ">= 40 dB")
+        row("Common-mode input range (%)", f"{results['cmir']:.2f}", ">= 5.0 %")
+        row("Output voltage range (%)", f"{results['ovr']:.2f}", ">= 5.0 %")
     elif sim_type == "dep4":
-        row("電源電圧(V)", "5.000")
-        row("消費電流(A)", f"{results['ib']:.8f}")
-        row("消費電力(W)", f"{results['pdis']:.7f}")
-        row("直流利得(dB)", f"{results['dcgain_db']:.2f}", ">= 40 dB")
-        row("位相余裕(deg)", f"{results['pm']:.2f}", ">= 45 deg")
-        row("スルーレート(V/s)", f"{results['sr']:.3e}", ">= 1.000e+06 V/s")
-        row("全高調波歪(%)", f"{results['thd']:.4f}", "<= 0.1 %")
-        row("帯域幅(Hz)", f"{results['bw']:.3e}", ">= 2.000e+04 Hz")
-        row("入力電圧振幅(V)", f"{results['ivr']:.2f}", ">= 0.1 V")
-        row("オフセット電圧", f"{results['offset']:.2f}", "絶対値 <= 0.1 V")
+        row("Supply voltage (V)", si_value(5.0, "V"))
+        row("Supply current (A)", si_value(results["ib"], "A"))
+        row("Power consumption (W)", si_value(results["pdis"], "W"))
+        row("DC gain (dB)", f"{results['dcgain_db']:.2f}", ">= 40 dB")
+        row("Phase margin (deg)", f"{results['pm']:.2f}", ">= 45 deg")
+        row("Slew rate (V/s)", si_value(results["sr"], "V/s"), ">= 1 MV/s")
+        row("Total harmonic distortion (%)", f"{results['thd']:.4f}", "<= 0.1 %")
+        row("Bandwidth (Hz)", si_value(results["bw"], "Hz"), ">= 20 kHz")
+        row("Input voltage amplitude (V)", si_value(results["ivr"], "V"), ">= 100 mV")
+        row("Offset voltage (V)", si_value(results["offset"], "V"), "Absolute value <= 100 mV")
 
-    row("占有面積(um^2)", "本プログラムでは未算出")
-    print(tabulate(
-        rows,
-        headers=["項目", "値", "最低満たすべき条件"],
-        tablefmt="simple",
+    row(
+        "Occupied area (μm²)",
+        f"{mos_area:.3f}" if mos_area is not None else "Unavailable",
+    )
+    headers = ["Metric", "Value", "Requirement"]
+    table_kwargs = dict(
+        headers=headers,
         colalign=("left", "right", "left"),
         disable_numparse=True,
-    ))
+    )
+    print(tabulate(rows, tablefmt="simple_grid", **table_kwargs))
+    if markdown_path is not None:
+        markdown_numeric_values = {
+            "FOM (dep1)": results.get("fomdep1"),
+            "FOM (dep2)": results.get("fomdep2"),
+            "FOM (dep3)": results.get("fomdep3"),
+            "FOM (dep4)": results.get("fomdep4"),
+            "Supply voltage (V)": psvoltage if sim_type != "dep4" else 5.0,
+            "Supply current (A)": results.get("ib"),
+            "Power consumption (W)": results.get("pdis"),
+            "Output resistance (Ω)": results.get("ro"),
+            "DC gain (dB)": results.get("dcgain_db"),
+            "Phase margin (deg)": results.get("pm"),
+            "Gain-bandwidth product (Hz)": results.get("gbw"),
+            "Input-referred noise (V)": results.get("irn"),
+            "Slew rate (V/s)": results.get("sr"),
+            "Total harmonic distortion (%)": results.get("thd"),
+            "Common-mode rejection ratio (dB)": results.get("cmrr_db"),
+            "Power-supply rejection ratio (dB)": results.get("psrr_db"),
+            "Common-mode input range (%)": results.get("cmir"),
+            "Output voltage range (%)": results.get("ovr"),
+            "Bandwidth (Hz)": results.get("bw"),
+            "Input voltage amplitude (V)": results.get("ivr"),
+            "Offset voltage (V)": results.get("offset"),
+            "Occupied area (μm²)": mos_area,
+        }
+        label_map = {
+            "Metric": "項目",
+            "FOM": "FOM",
+            "Supply voltage (V)": "電源電圧(V)",
+            "Supply current (A)": "消費電流(A)",
+            "Power consumption (W)": "消費電力(W)",
+            "Output resistance (Ω)": "出力抵抗(Ω)",
+            "DC gain (dB)": "直流利得(dB)",
+            "Phase margin (deg)": "位相余裕(deg)",
+            "Gain-bandwidth product (Hz)": "利得帯域幅積(Hz)",
+            "Input-referred noise (V)": "入力換算雑音(V)",
+            "Slew rate (V/s)": "スルーレート(V/s)",
+            "Total harmonic distortion (%)": "全高調波歪(%)",
+            "Common-mode rejection ratio (dB)": "同相除去比(dB)",
+            "Power-supply rejection ratio (dB)": "電源電圧変動除去比(dB)",
+            "Common-mode input range (%)": "同相入力範囲(%)",
+            "Output voltage range (%)": "出力電圧範囲(%)",
+            "Bandwidth (Hz)": "帯域幅(Hz)",
+            "Input voltage amplitude (V)": "入力電圧振幅(V)",
+            "Offset voltage (V)": "オフセット電圧(V)",
+            "Occupied area (μm²)": "占有面積(μm²)",
+        }
+        condition_map = {
+            "Calculated in this analysis": "今回の解析で算出",
+            "Within ±50% of the reference value": "各解析で基準値の±50%以内",
+            "Absolute value <= 0.1 V": "絶対値 <= 0.1 V",
+        }
+        markdown_rows = [
+            [
+                label_map.get(label, label),
+                (
+                    f"{markdown_numeric_values[label]:.3e}"
+                    if markdown_numeric_values.get(label) is not None
+                    else value
+                ),
+                condition_map.get(condition, condition),
+            ]
+            for label, value, condition in rows
+        ]
+        markdown_kwargs = dict(
+            headers=["項目", "値", "最低満たすべき条件"],
+            colalign=("left", "right", "left"),
+            disable_numparse=True,
+        )
+        markdown = (
+            "# シミュレーション結果\n\n"
+            + tabulate(markdown_rows, tablefmt="github", **markdown_kwargs)
+            + "\n\n## SR波形プレビュー\n\n"
+        )
+        sr_image = OUTPUT_DIR / "sr_waveform.svg"
+        if sr_image.exists():
+            markdown += "![SR波形](out/sr_waveform.svg)\n"
+        else:
+            markdown += "SR波形画像は生成されませんでした。\n"
+        Path(markdown_path).write_text(
+            markdown,
+            encoding="utf-8",
+        )
 
 
-def _clear_output_directory(output_dir="out"):
+def _clear_output_directory(output_dir=OUTPUT_DIR):
     """結果出力用ディレクトリを初期化する。"""
     output_path = Path(output_dir)
     output_path.mkdir(exist_ok=True)
@@ -535,7 +975,9 @@ def _clear_output_directory(output_dir="out"):
             path.unlink()
 
 
-def _write_processed_netlist(department, source_file="opamp.sp", output_file="tmp.sp"):
+def _write_processed_netlist(
+    department, source_file="./opamp.sp", output_file="tmp.sp"
+):
     """opamp.spを処理し、HSPICEが読み込むtmp.spへ保存する。"""
     source_path = Path(source_file)
     output_path = Path(output_file)
@@ -544,13 +986,16 @@ def _write_processed_netlist(department, source_file="opamp.sp", output_file="tm
     output_path.write_text(processed_netlist + "\n", encoding="utf-8")
 
 
-def _run_hspice(input_file, output_file):
-    """HSPICEを実行する。"""
-    return subprocess.run(
+def _run_hspice(input_file, output_file, debug=False):
+    """HSPICEを実行し、異常終了時はエラー内容を表示する。"""
+    result = subprocess.run(
         ["hspice", "-i", input_file, "-o", output_file],
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
     )
+    _print_hspice_error(result, output_file)
+    _debug_subprocess_result(result, debug)
+    return result
 
 
 def _read_measurement_csv(filename, **kwargs):
@@ -575,9 +1020,9 @@ def _extract_thd(lis_content, default):
     return float(values[-1]) if values else default
 
 
-def _prepare_slew_rate_simulation(sr_vp):
+def _prepare_slew_rate_simulation(sr_vp, debug=False):
     """部門1〜3の1回目の結果からSR用のVPを決めて2回目を実行する。"""
-    _run_hspice("sim1.sp", "result1.lis")
+    _run_hspice("sim1.sp", "result1.lis", debug=debug)
 
     df = _read_measurement_csv("result1.ms4.csv")
     cmr1 = _measurement_value(df["cmr1"], 0, 0.1)
@@ -588,7 +1033,7 @@ def _prepare_slew_rate_simulation(sr_vp):
         f"* Vp value for SR\n\n.lib vpval\n.param vp={vp}\n.endl vpval\n\n",
         encoding="utf-8",
     )
-    _run_hspice("sim2.sp", "result2.lis")
+    _run_hspice("sim2.sp", "result2.lis", debug=debug)
 
 
 def _extract_dep1_3_results():
@@ -741,7 +1186,7 @@ def _extract_dep4_results():
     return results
 
 
-def _plot_simulation_results(sim_type):
+def _plot_simulation_results(sim_type, debug=False):
     """シミュレーション結果から波形プロットを生成する。"""
     try:
         if sim_type in {"dep1", "dep2", "dep3"}:
@@ -749,7 +1194,8 @@ def _plot_simulation_results(sim_type):
         elif sim_type == "dep4":
             plot_dep4()
     except Exception as error:
-        print("波形プロット中にエラーが発生しました:", error)
+        print("An error occurred while plotting waveforms:", error)
+        _debug_exception("波形プロット", error, debug)
 
 
 def _cleanup_simulation_files():
@@ -781,11 +1227,23 @@ def _cleanup_simulation_files():
             path.unlink()
 
 
-def simulate_and_print(sim_type="dep1", sr_vp="min"):
-    """HSPICEシミュレーションを実行し、結果を標準出力へ表示する。"""
-    _clear_output_directory()
-    _write_processed_netlist(sim_type)
-    print("シミュレーション中...")
+def simulate_and_print(sim_type="dep1", sr_vp="min", debug=None):
+    """HSPICEシミュレーションを実行し、結果を標準出力へ表示する。
+
+    ``debug=True`` または ``SIMULATOR_DEBUG=1`` を指定すると、例外の
+    発生関数・行番号・トレースバックとHSPICEの出力を表示する。
+    """
+    debug = _debug_enabled(debug)
+    try:
+        _clear_output_directory()
+        mos_area = calculate_mos_area_from_file("./opamp.sp", department=sim_type)
+        _write_processed_netlist(sim_type)
+    except Exception as error:
+        print("An error occurred while preparing the simulation:", error)
+        _debug_exception("シミュレーション準備", error, debug)
+        return
+
+    print("Running simulation...")
 
     results = {}
     psvoltage = None
@@ -793,24 +1251,36 @@ def simulate_and_print(sim_type="dep1", sr_vp="min"):
 
     try:
         if sim_type in {"dep1", "dep2", "dep3"}:
-            _prepare_slew_rate_simulation(sr_vp)
+            _prepare_slew_rate_simulation(sr_vp, debug=debug)
             results, psvoltage = _extract_dep1_3_results()
         elif sim_type == "dep4":
-            _run_hspice("sim3.sp", "result1.lis")
+            _run_hspice("sim3.sp", "result1.lis", debug=debug)
             results = _extract_dep4_results()
         else:
-            raise ValueError(f"未知のシミュレーション部門です: {sim_type}")
+            raise ValueError(f"Unknown simulation department: {sim_type}")
     except Exception as error:
-        print("結果の抽出中にエラーが発生しました:", error)
+        print("An error occurred while extracting results:", error)
+        _debug_exception("シミュレーション結果の抽出", error, debug)
         error_flag = True
 
-    print("シミュレーション完了")
-    print_performance_table(
-        results,
-        sim_type,
-        psvoltage=psvoltage,
-        error_flag=error_flag,
-    )
+    print("Simulation complete")
     if not error_flag:
-        _plot_simulation_results(sim_type)
+        _plot_simulation_results(sim_type, debug=debug)
+        # 波形生成後にMarkdownを作成し、SR波形をプレビューへ含める。
+        print_performance_table(
+            results,
+            sim_type,
+            psvoltage=psvoltage,
+            mos_area=mos_area,
+            error_flag=False,
+            markdown_path=RESULT_MARKDOWN_PATH,
+        )
+    else:
+        print_performance_table(
+            results,
+            sim_type,
+            psvoltage=psvoltage,
+            mos_area=mos_area,
+            error_flag=True,
+        )
     _cleanup_simulation_files()
