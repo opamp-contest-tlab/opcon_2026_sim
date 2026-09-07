@@ -6,3 +6,4 @@ tests
 tests/*
 sim_data/
 tmp/
+simulation_results.md
