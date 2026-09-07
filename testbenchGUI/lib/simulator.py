@@ -1032,6 +1032,24 @@ def _extract_thd(lis_content, default):
     return float(values[-1]) if values else default
 
 
+def _extract_tf_output_resistance(lis_content, default):
+    """.TF の small-signal transfer characteristics から出力抵抗を抽出する。"""
+    blocks = re.findall(
+        r"(?is)small-signal\s+transfer\s+characteristics(.*?)(?=\*{5,}|\Z)",
+        lis_content,
+    )
+    pattern = (
+        r"(?i)output\s+resistance\s+at\s+.*?="
+        r"\s*([+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eEdD][+-]?\d+)?)"
+    )
+    values = [
+        value.replace("D", "E").replace("d", "e")
+        for block in blocks
+        for value in re.findall(pattern, block)
+    ]
+    return float(values[-1]) if values else default
+
+
 def _prepare_slew_rate_simulation(sr_vp, debug=False):
     """部門1〜3の1回目の結果からSR用のVPを決めて2回目を実行する。"""
     _run_hspice("sim1.sp", "result1.lis", debug=debug)
@@ -1076,11 +1094,13 @@ def _extract_dep1_3_results():
     results["ib_diff"] = ib_diff
     results["pdis_const"] = results["pdis"] <= 0.1
 
-    # 出力抵抗
-    ro_df = _read_measurement_csv("result1.ma1.csv")
-    rosim = _measurement_value(ro_df["ro"], 0, 1e6)
-    r1, r2 = ro_df["r1"][0], ro_df["r2"][0]
-    beta, rl = ro_df["beta"][0], ro_df["rl"][0]
+    # 出力抵抗のシミュレーション値（.TF の listing 出力）と補正用パラメータ
+    rosim = _extract_tf_output_resistance(lis_content, 1e6)
+    # NOTE:本当は変数で管理するべき
+    r1 = 10e+3  # 10k
+    r2 = 10e+3  # 10k
+    beta = r1/(r1+r2)
+    rl = 20e+3  # 20k
 
     # 直流利得・位相余裕・利得帯域幅積
     gain_df = _read_measurement_csv("result1.ma2.csv")

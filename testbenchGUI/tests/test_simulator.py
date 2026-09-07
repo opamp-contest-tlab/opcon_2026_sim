@@ -9,6 +9,7 @@ from lib.simulator import (
     PROJECT_ROOT,
     RESULT_MARKDOWN_PATH,
     _debug_exception,
+    _extract_tf_output_resistance,
     _unit_resistor_count,
     calculate_mos_area,
     calculate_mos_area_from_file,
@@ -26,6 +27,24 @@ def test_output_paths_keep_out_in_execution_directory():
     assert PROJECT_ROOT == execution_directory.parent
     assert OUTPUT_DIR == execution_directory / "out"
     assert RESULT_MARKDOWN_PATH == execution_directory.parent / "simulatinon_results.md"
+
+
+def test_extract_tf_output_resistance_from_listing():
+    lis_content = """
+ ****     small-signal transfer characteristics
+
+      v(out)/vin                               =  1.489e+00
+      input resistance at             vin      =  1.000e+20
+      output resistance at v(out)              =  5.093e+03
+
+          ***** job concluded
+    """
+
+    assert _extract_tf_output_resistance(lis_content, 1e6) == pytest.approx(5093.0)
+
+
+def test_extract_tf_output_resistance_uses_default_when_absent():
+    assert _extract_tf_output_resistance("no TF result", 1e6) == 1e6
 
 
 OPAMP_NETLIST = Path(__file__).parents[1] / "opamp.sp"

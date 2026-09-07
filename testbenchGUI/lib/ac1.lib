@@ -17,19 +17,17 @@
 * .MEAS AC ro FIND V(out) AT=0.1
 
 
-IOUT	out 0 	DC 0 AC 1
-VDD	vdd 0	'half'
-VSS	0 vss	'half'
+VIN	in 0 DC 0 AC 1
+VDD	vdd 0 'half'
+VSS	0 vss 'half'
 
-X1	s 0 out vdd vss	opamp
+X1 s in out vdd vss	opamp
 R1 s gnd valr1
 R2 out s valr2
 
- 
 .TEMP 25
 .PARAM half='psvoltage/2' valr1=10k valr2=10k valrl=20k
-.AC DEC 100 0.1 10G
-.MEAS AC ro FIND V(out) AT=0.1
+.TF V(out) VIN
 
 * PARAMS for rosim to ro
 .MEAS AC r1 PARAM=valr1

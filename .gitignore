@@ -1,2 +1,8 @@
 AGENTS.md
 testbenchGUI/out
+tmp-opa-contest/
+tmp-opa-contest/
+tests
+tests/*
+sim_data/
+tmp/
