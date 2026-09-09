@@ -155,6 +155,18 @@ M1 N001 N001 Vdd Vdd cmosp l=0.2u w=4.1u m=val1
     assert calculate_mos_area(netlist) == pytest.approx(132.02)
 
 
+def test_process_netlist_supports_scientific_notation_for_mos_width():
+    """w の指数表記を保持して拡散寸法を生成する。"""
+    source = "M1 d g s b cmosn w=9.0e-6 l=0.2u\n"
+
+    processed = process_netlist(source, "dep1")
+
+    assert "ad='9.0e-6*0.6u'" in processed
+    assert "as='9.0e-6*0.6u'" in processed
+    assert "pd='9.0e-6+0.6u*2'" in processed
+    assert "ps='9.0e-6+0.6u*2'" in processed
+
+
 def test_calculate_area_for_dep4_uses_mos_capacitor_and_resistor_formulas():
     """部門4は MOS・容量・抵抗を指定の um^2 換算式で合計する。"""
     netlist = """

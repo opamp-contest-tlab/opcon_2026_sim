@@ -108,9 +108,13 @@ def process_netlist(netlist_text, department):
         stripped = line.strip()
         
         # MOSFET行判定（行頭が M の場合）
-        if stripped.startswith("M"):
+        if stripped.startswith("M") or stripped.startswith("m"):
             # w=<something> を取り出す
-            w_match = re.search(r"w\s*=\s*([\d\.]+[munp]?)", line, re.IGNORECASE)
+            w_match = re.search(
+                r"w\s*=\s*((?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?[munp]?)",
+                line,
+                re.IGNORECASE,
+            )
             if w_match:
                 w_val = w_match.group(1)  # 例: "5u"
 

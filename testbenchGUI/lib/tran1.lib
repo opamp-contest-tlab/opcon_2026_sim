@@ -17,7 +17,8 @@ R2	out s valr2
 * .MEAS FFT thd THD VM(out) NBHARM=10
 
 .PARAM fs=100 tstop='9/fs' tres='1/fs/1024'
-.TRAN tres tstop START='tstop-1/fs'
+* 2026コンテストHPに合わせて修正
+.TRAN 10n 1.001 START='1.001-10m'
 .FOUR 100 V(out)
 
 .endl tran1

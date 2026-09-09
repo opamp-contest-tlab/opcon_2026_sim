@@ -22,7 +22,8 @@ VDD	vdd 0 'half'
 VSS	0 vss 'half'
 
 X1 s in out vdd vss	opamp
-R1 s gnd valr1
+* gnd -> 0 に修正
+R1 s 0 valr1
 R2 out s valr2
 
 .TEMP 25
