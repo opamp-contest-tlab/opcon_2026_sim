@@ -1,5 +1,0 @@
-$DATA1 SOURCE='HSPICE' VERSION='P-2019.06-SP2-2 linux64' PARAM_COUNT=0
-$OPTION MEASFORM=3
-.TITLE 'dc4'
-ibd,ibs,ib_tt,pdis_tt,temper,alter#
--9.0978e-06,-9.0976e-06, 9.0978e-06, 1.4556e-05, 2.5000e+01,10
