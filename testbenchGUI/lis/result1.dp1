@@ -1,0 +1,293 @@
+ ****** HSPICE -- P-2019.06-SP2-2 linux64 (Feb  3 2020) ******                  
+ ******  
+ ac2
+
+ ****** operating point information tnom=  25.000 temp=  25.000 ******
+ ****** operating point status is all       simulation time is   0.0000e+00
+     node    =voltage
+inp= 0.0000e+00     
+out= 2.7988e-04     
+s= 2.7988e-04     
+vdd= 6.0000e-01     
+vss=-6.0000e-01     
+x1.net003= 5.4463e-01     
+x1.net004=-1.5938e-02     
+x1.net016=-8.4462e-02     
+x1.net021=-1.5938e-02     
+x1.net027=-2.4999e-02     
+
+ **** voltage sources
+
+subckt                      
+ element vdd                 
+  volts    6.0000e-01
+  current -1.1543e-05
+  power    6.9256e-06
+
+subckt                      
+ element vin                 
+  volts    0.0000e+00
+  current  0.0000e+00
+  power    0.0000e+00
+
+subckt                      
+ element vss                 
+  volts    6.0000e-01
+  current -1.1529e-05
+  power    6.9172e-06
+
+     total voltage source power dissipation=  1.3843e-05      watts
+
+
+
+ **** resistors
+
+subckt                      
+ element rl                  
+  r value  2.0000e+04
+  v drop   2.7988e-04
+  current  1.3994e-08
+  power    3.9166e-12
+
+subckt                      
+ element rf                  
+  r value  1.0000e+12
+  v drop  -1.3010e-18
+  current -1.3010e-30
+  power    1.6927e-48
+
+subckt  x1    
+ element x1.r0                  
+  r value  1.4500e+05
+  v drop   5.7500e-01
+  current  3.9655e-06
+  power    2.2802e-06
+
+subckt  x1    
+ element x1.r002                
+  r value  1.6000e+05
+  v drop   0.0000e+00
+  current  0.0000e+00
+  power    0.0000e+00
+
+
+
+ **** mosfets
+
+
+subckt  x1    
+ element x1.mn1                 
+ model   cmosn               
+ region   Saturation 
+  id       1.8055e-06
+  ibs      0.0000e+00
+  ibd      0.0000e+00
+  vgs      5.1554e-01
+  vds      5.1554e-01
+  vbs      0.0000e+00
+  vth      3.7507e-01
+  vdsat    1.1415e-01
+  vod      1.4046e-01
+  beta     2.4113e-04
+  gam eff  5.7681e-01
+  gm       2.4269e-05
+  gds      4.0155e-08
+  gmb      6.7821e-06
+  cdtot    1.5959e-14
+  cgtot    6.7734e-13
+  cstot    3.7172e-13
+  cbtot    2.3697e-13
+  cgs      6.1874e-13
+  cgd      8.2074e-15
+
+
+
+subckt  x1    
+ element x1.mn2                 
+ model   cmosn               
+ region   Saturation 
+  id       1.8082e-06
+  ibs      0.0000e+00
+  ibd      0.0000e+00
+  vgs      5.1554e-01
+  vds      5.8406e-01
+  vbs      0.0000e+00
+  vth      3.7507e-01
+  vdsat    1.1415e-01
+  vod      1.4046e-01
+  beta     2.4113e-04
+  gam eff  5.7681e-01
+  gm       2.4299e-05
+  gds      3.7942e-08
+  gmb      6.7901e-06
+  cdtot    1.5753e-14
+  cgtot    6.7714e-13
+  cstot    3.7160e-13
+  cbtot    2.3682e-13
+  cgs      6.1860e-13
+  cgd      8.0893e-15
+
+
+
+subckt  x1    
+ element x1.mn3                 
+ model   cmosn               
+ region   Saturation 
+  id       3.9494e-06
+  ibs      0.0000e+00
+  ibd      0.0000e+00
+  vgs      5.8406e-01
+  vds      6.0028e-01
+  vbs      0.0000e+00
+  vth      3.7507e-01
+  vdsat    1.6068e-01
+  vod      2.0899e-01
+  beta     2.4215e-04
+  gam eff  5.7681e-01
+  gm       3.8007e-05
+  gds      7.1456e-08
+  gmb      1.0469e-05
+  cdtot    1.5864e-14
+  cgtot    6.8474e-13
+  cstot    3.7755e-13
+  cbtot    2.3419e-13
+  cgs      6.3135e-13
+  cgd      8.2472e-15
+
+
+
+subckt  x1    
+ element x1.mp1                 
+ model   cmosp               
+ region   Saturation 
+  id      -3.9655e-06
+  ibs      0.0000e+00
+  ibd      0.0000e+00
+  vgs     -6.2500e-01
+  vds     -6.2500e-01
+  vbs      0.0000e+00
+  vth     -3.8608e-01
+  vdsat   -1.9556e-01
+  vod     -2.3892e-01
+  beta     1.7432e-04
+  gam eff  5.3078e-01
+  gm       3.2023e-05
+  gds      8.4986e-08
+  gmb      1.0199e-05
+  cdtot    4.7874e-14
+  cgtot    2.0033e-12
+  cstot    1.1455e-12
+  cbtot    7.0409e-13
+  cgs      1.8714e-12
+  cgd      2.0972e-14
+
+
+
+subckt  x1    
+ element x1.mp2                 
+ model   cmosp               
+ region   Linear     
+  id      -3.6138e-06
+  ibs      0.0000e+00
+  ibd      0.0000e+00
+  vgs     -6.2500e-01
+  vds     -5.5366e-02
+  vbs      0.0000e+00
+  vth     -3.8668e-01
+  vdsat   -1.9511e-01
+  vod     -2.3832e-01
+  beta     3.4860e-04
+  gam eff  5.3078e-01
+  gm       1.8635e-05
+  gds      5.4051e-05
+  gmb      6.3886e-06
+  cdtot    1.4254e-12
+  cgtot    4.9278e-12
+  cstot    1.9203e-12
+  cbtot    1.6032e-12
+  cgs      3.2489e-12
+  cgd      1.7258e-12
+
+
+
+subckt  x1    
+ element x1.mp3                 
+ model   cmosp               
+ region   Saturation 
+  id      -3.9634e-06
+  ibs      0.0000e+00
+  ibd      0.0000e+00
+  vgs     -6.2500e-01
+  vds     -5.9972e-01
+  vbs      0.0000e+00
+  vth     -3.8611e-01
+  vdsat   -1.9554e-01
+  vod     -2.3889e-01
+  beta     1.7432e-04
+  gam eff  5.3078e-01
+  gm       3.2010e-05
+  gds      8.6659e-08
+  gmb      1.0195e-05
+  cdtot    4.8237e-14
+  cgtot    2.0036e-12
+  cstot    1.1457e-12
+  cbtot    7.0432e-13
+  cgs      1.8716e-12
+  cgd      2.1216e-14
+
+
+
+subckt  x1    
+ element x1.mp4                 
+ model   cmosp               
+ region   Saturation 
+  id      -1.8055e-06
+  ibs      0.0000e+00
+  ibd      0.0000e+00
+  vgs     -5.4435e-01
+  vds     -6.2910e-01
+  vbs      0.0000e+00
+  vth     -3.8608e-01
+  vdsat   -1.3656e-01
+  vod     -1.5828e-01
+  beta     1.7785e-04
+  gam eff  5.3078e-01
+  gm       2.1225e-05
+  gds      4.7051e-08
+  gmb      6.6577e-06
+  cdtot    4.7263e-14
+  cgtot    1.9855e-12
+  cstot    1.1310e-12
+  cbtot    7.1064e-13
+  cgs      1.8409e-12
+  cgd      2.0231e-14
+
+
+
+subckt  x1    
+ element x1.mp5                 
+ model   cmosp               
+ region   Saturation 
+  id      -1.8082e-06
+  ibs      0.0000e+00
+  ibd      0.0000e+00
+  vgs     -5.4463e-01
+  vds     -5.6057e-01
+  vbs      0.0000e+00
+  vth     -3.8615e-01
+  vdsat   -1.3671e-01
+  vod     -1.5848e-01
+  beta     1.7784e-04
+  gam eff  5.3078e-01
+  gm       2.1236e-05
+  gds      4.8627e-08
+  gmb      6.6633e-06
+  cdtot    4.8016e-14
+  cgtot    1.9862e-12
+  cstot    1.1315e-12
+  cbtot    7.1119e-13
+  cgs      1.8416e-12
+  cgd      2.0587e-14
+
+
+

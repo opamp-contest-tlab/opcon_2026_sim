@@ -24,9 +24,8 @@ CF	s 0			valcf
 * 開ループ利得が0dBになった周波数
 .meas AC ugf when vdb(out)=0.0
 * 開ループ利得が直流利得の平方根(dBで半分)になった時の周波数と利得の積
-.meas ac dcgain_half param='dcgain/2'
-.meas ac dcgain_db_half param='dcgain_db/2'
-.meas ac freq_half when vdb(out)='dcgain_db_half'
+.meas ac freq_half when vdb(out)='dcgain_db/2'
+.meas ac dcgain_half find vm(out) at=freq_half
 .meas ac product_dcgain_freq param='freq_half*dcgain_half'
 * のどちらか小さい方
 .meas ac gbw param='min(ugf,product_dcgain_freq)'
