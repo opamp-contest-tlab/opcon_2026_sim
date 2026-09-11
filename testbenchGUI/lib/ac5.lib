@@ -30,18 +30,23 @@ R2b     oss 0                   valrl
  
 .PARAM half='psvoltage/2' valrl=20k valrf=1T valcf=10m
 + valr1=10k valr2=10k
+* 2026コンテストHP準拠
 .AC DEC 100 0.1 1
+.MEAS pd FIND PAR('VDB(od) - VDB(odd)') AT=0.1
+.MEAS ps FIND PAR('VDB(od) - VDB(oss)') AT=0.1
+.MEAS psrr PARAM='min(pd,ps)'
+
 * .MEAS AC pd   FIND VDB(od,odd) AT=0.1
 * .MEAS AC ps   FIND VDB(od,oss) AT=0.1
-.PROTECT
-.MEAS AC pd   FIND par'vm(od)/vm(odd)' AT=0.1
-.MEAS AC ps   FIND par'vm(od)/vm(oss)' AT=0.1
-.MEAS AC psrr PARAM='min(pd,ps)' AT=0.1
-
-.MEAS AC pd_db   FIND par'vdb(od) - vdb(odd)' AT=0.1
-.MEAS AC ps_db   FIND par'vdb(od) - vdb(oss)' AT=0.1
-.MEAS AC psrr_db PARAM='min(pd_db,ps_db)' AT=0.1
-
-.PRINT AC 'vdb(od,odd)' 'vdb(od,oss)'
+* .PROTECT
+* .MEAS AC pd   FIND par'vm(od)/vm(odd)' AT=0.1
+* .MEAS AC ps   FIND par'vm(od)/vm(oss)' AT=0.1
+* .MEAS AC psrr PARAM='min(pd,ps)' AT=0.1
+* 
+* .MEAS AC pd_db   FIND par'vdb(od) - vdb(odd)' AT=0.1
+* .MEAS AC ps_db   FIND par'vdb(od) - vdb(oss)' AT=0.1
+* .MEAS AC psrr_db PARAM='min(pd_db,ps_db)' AT=0.1
+* 
+* .PRINT AC 'vdb(od,odd)' 'vdb(od,oss)'
 
 .endl ac5

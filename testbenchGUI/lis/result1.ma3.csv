@@ -1,0 +1,5 @@
+$DATA1 SOURCE='HSPICE' VERSION='P-2019.06-SP2-2 linux64' PARAM_COUNT=0
+$OPTION MEASFORM=3
+.TITLE 'ac3'
+input_noise,irn,temper,alter#
+ 1.3187e-05, 3.6313e-03, 2.5000e+01,4

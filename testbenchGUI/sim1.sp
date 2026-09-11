@@ -60,3 +60,15 @@
 .del lib 'lib/ac5.lib' ac5
 .lib 'lib/dc3.lib' dc3
 **************************
+
+* dc4 ********************
+.alter dc4
+.del lib 'lib/dc3.lib' dc3
+.lib 'lib/dc4.lib' dc4
+**************************
+
+* srdc ********************
+.alter srdc
+.del lib 'lib/dc4.lib' dc4
+.lib 'lib/srdc.lib' srdc
+**************************

@@ -1,0 +1,507 @@
+ ****** HSPICE -- P-2019.06-SP2-2 linux64 (Feb  3 2020) ******                  
+ ******  
+ ac1
+
+ ****** operating point information tnom=  25.000 temp=  25.000 ******
+ ****** operating point status is voltage   simulation time is   0.0000e+00
+     node    =voltage
+in= 0.0000e+00     
+out= 4.0052e-06     
+s= 2.0026e-06     
+vdd= 8.0000e-01     
+vss=-8.0000e-01     
+x1.fbm=-3.5839e-01     
+x1.fbp=-3.5839e-01     
+x1.n001= 3.9642e-01     
+x1.n002= 3.9603e-01     
+x1.n003= 7.6009e-01     
+x1.n004=-3.7657e-01     
+x1.n005=-4.1601e-01     
+x1.n006=-4.6188e-01     
+x1.vbn=-3.8543e-01     
+x1.vbp= 4.0215e-01     
+
+ **** voltage sources
+
+subckt                      
+ element vin                 
+  volts    0.0000e+00
+  current  0.0000e+00
+  power    0.0000e+00
+
+subckt                      
+ element vdd                 
+  volts    8.0000e-01
+  current -9.0978e-06
+  power    7.2782e-06
+
+subckt                      
+ element vss                 
+  volts    8.0000e-01
+  current -9.0976e-06
+  power    7.2781e-06
+
+     total voltage source power dissipation=  1.4556e-05      watts
+
+
+
+ **** resistors
+
+subckt                      
+ element r1                  
+  r value  1.0000e+04
+  v drop   2.0026e-06
+  current  2.0026e-10
+  power    4.0104e-16
+
+subckt                      
+ element r2                  
+  r value  1.0000e+04
+  v drop   2.0026e-06
+  current  2.0026e-10
+  power    4.0104e-16
+
+subckt  x1    
+ element x1.r1                  
+  r value  1.0000e+06
+  v drop   7.8758e-01
+  current  7.8758e-07
+  power    6.2028e-07
+
+
+
+ **** mosfets
+
+
+subckt  x1    
+ element x1.m1                  
+ model   cmosn               
+ region   Subth      
+  id       6.4043e-07
+  ibs      0.0000e+00
+  ibd      0.0000e+00
+  vgs      3.7657e-01
+  vds      1.8179e-02
+  vbs     -4.2343e-01
+  vth      5.1673e-01
+  vdsat    3.5675e-02
+  vod     -1.4016e-01
+  beta     5.9694e-02
+  gam eff  5.7627e-01
+  gm       1.7230e-05
+  gds      2.3778e-05
+  gmb      4.4432e-06
+  cdtot    6.9284e-13
+  cgtot    2.1451e-12
+  cstot    7.2792e-13
+  cbtot    2.0738e-12
+  cgs      4.2357e-13
+  cgd      3.5274e-13
+
+
+
+subckt  x1    
+ element x1.m2                  
+ model   cmosn               
+ region   Subth      
+  id       6.4041e-07
+  ibs      0.0000e+00
+  ibd      0.0000e+00
+  vgs      3.7657e-01
+  vds      1.8180e-02
+  vbs     -4.2343e-01
+  vth      5.1673e-01
+  vdsat    3.5675e-02
+  vod     -1.4016e-01
+  beta     5.9694e-02
+  gam eff  5.7627e-01
+  gm       1.7230e-05
+  gds      2.3776e-05
+  gmb      4.4431e-06
+  cdtot    6.9284e-13
+  cgtot    2.1451e-12
+  cstot    7.2792e-13
+  cbtot    2.0738e-12
+  cgs      4.2357e-13
+  cgd      3.5274e-13
+
+
+
+subckt  x1    
+ element x1.m3                  
+ model   cmosn               
+ region   Saturation 
+  id       1.2808e-06
+  ibs      0.0000e+00
+  ibd      0.0000e+00
+  vgs      4.1457e-01
+  vds      4.2343e-01
+  vbs      0.0000e+00
+  vth      3.9665e-01
+  vdsat    5.2613e-02
+  vod      1.7924e-02
+  beta     1.4606e-03
+  gam eff  5.7664e-01
+  gm       2.8134e-05
+  gds      1.0596e-07
+  gmb      8.1490e-06
+  cdtot    1.7210e-14
+  cgtot    1.1513e-13
+  cstot    6.2551e-14
+  cbtot    6.0458e-14
+  cgs      8.6004e-14
+  cgd      8.5008e-15
+
+
+
+subckt  x1    
+ element x1.m4                  
+ model   cmosn               
+ region   Subth      
+  id       7.8758e-07
+  ibs      0.0000e+00
+  ibd      0.0000e+00
+  vgs      4.1457e-01
+  vds      4.1457e-01
+  vbs      0.0000e+00
+  vth      4.2120e-01
+  vdsat    4.6571e-02
+  vod     -6.6250e-03
+  beta     1.4883e-03
+  gam eff  5.7599e-01
+  gm       1.8078e-05
+  gds      1.1517e-07
+  gmb      5.2763e-06
+  cdtot    8.7078e-15
+  cgtot    2.8894e-14
+  cstot    1.7196e-14
+  cbtot    1.9584e-14
+  cgs      1.8362e-14
+  cgd      4.2284e-15
+
+
+
+subckt  x1    
+ element x1.m5                  
+ model   cmosp               
+ region   Saturation 
+  id      -6.4048e-07
+  ibs      0.0000e+00
+  ibd      0.0000e+00
+  vgs     -4.0397e-01
+  vds     -4.0397e-01
+  vbs      0.0000e+00
+  vth     -3.9871e-01
+  vdsat   -5.4581e-02
+  vod     -5.2554e-03
+  beta     8.2052e-04
+  gam eff  5.3074e-01
+  gm       1.3649e-05
+  gds      5.7585e-08
+  gmb      4.3206e-06
+  cdtot    3.9390e-14
+  cgtot    2.2605e-13
+  cstot    1.2659e-13
+  cbtot    1.3664e-13
+  cgs      1.6216e-13
+  cgd      1.7041e-14
+
+
+
+subckt  x1    
+ element x1.m6                  
+ model   cmosp               
+ region   Saturation 
+  id      -6.4045e-07
+  ibs      0.0000e+00
+  ibd      0.0000e+00
+  vgs     -4.0397e-01
+  vds     -4.0358e-01
+  vbs      0.0000e+00
+  vth     -3.9871e-01
+  vdsat   -5.4581e-02
+  vod     -5.2550e-03
+  beta     8.2052e-04
+  gam eff  5.3074e-01
+  gm       1.3648e-05
+  gds      5.7594e-08
+  gmb      4.3205e-06
+  cdtot    3.9393e-14
+  cgtot    2.2605e-13
+  cstot    1.2659e-13
+  cbtot    1.3664e-13
+  cgs      1.6216e-13
+  cgd      1.7041e-14
+
+
+
+subckt  x1    
+ element x1.m7                  
+ model   cmosp               
+ region   Saturation 
+  id      -6.6014e-06
+  ibs      0.0000e+00
+  ibd      0.0000e+00
+  vgs     -4.0358e-01
+  vds     -8.0000e-01
+  vbs      0.0000e+00
+  vth     -3.9828e-01
+  vdsat   -5.4800e-02
+  vod     -5.2965e-03
+  beta     8.2104e-03
+  gam eff  5.3078e-01
+  gm       1.4037e-04
+  gds      5.5499e-07
+  gmb      4.4469e-05
+  cdtot    3.6972e-13
+  cgtot    2.2592e-12
+  cstot    1.2632e-12
+  cbtot    1.3406e-12
+  cgs      1.6197e-12
+  cgd      1.7011e-13
+
+
+
+subckt  x1    
+ element x1.m8                  
+ model   cmosn               
+ region   Subth      
+  id       6.6012e-06
+  ibs      0.0000e+00
+  ibd      0.0000e+00
+  vgs      3.8399e-01
+  vds      8.0000e-01
+  vbs      0.0000e+00
+  vth      3.9655e-01
+  vdsat    4.4471e-02
+  vod     -1.2562e-02
+  beta     1.4612e-02
+  gam eff  5.7683e-01
+  gm       1.5266e-04
+  gds      5.2590e-07
+  gmb      4.4674e-05
+  cdtot    1.6431e-13
+  cgtot    9.5803e-13
+  cstot    4.7605e-13
+  cbtot    5.8984e-13
+  cgs      6.0104e-13
+  cgd      8.5121e-14
+
+
+
+subckt  x1    
+ element x1.m9                  
+ model   cmosn               
+ region   Subth      
+  id       6.4042e-07
+  ibs      0.0000e+00
+  ibd      0.0000e+00
+  vgs      3.5839e-01
+  vds      7.5481e-01
+  vbs     -4.4161e-01
+  vth      5.2074e-01
+  vdsat    3.5449e-02
+  vod     -1.6235e-01
+  beta     5.9731e-02
+  gam eff  5.7625e-01
+  gm       1.7701e-05
+  gds      6.4027e-08
+  gmb      4.5238e-06
+  cdtot    6.4295e-13
+  cgtot    2.1076e-12
+  cstot    7.0664e-13
+  cbtot    2.0292e-12
+  cgs      3.8724e-13
+  cgd      3.4173e-13
+
+
+
+subckt  x1    
+ element x1.m10                 
+ model   cmosn               
+ region   Subth      
+  id       6.4044e-07
+  ibs      0.0000e+00
+  ibd      0.0000e+00
+  vgs      3.5839e-01
+  vds      7.5442e-01
+  vbs     -4.4161e-01
+  vth      5.2074e-01
+  vdsat    3.5449e-02
+  vod     -1.6235e-01
+  beta     5.9731e-02
+  gam eff  5.7625e-01
+  gm       1.7702e-05
+  gds      6.4032e-08
+  gmb      4.5240e-06
+  cdtot    6.4296e-13
+  cgtot    2.1076e-12
+  cstot    7.0665e-13
+  cbtot    2.0292e-12
+  cgs      3.8724e-13
+  cgd      3.4173e-13
+
+
+
+subckt  x1    
+ element x1.m11                 
+ model   cmosp               
+ region   Subth      
+  id      -7.8758e-07
+  ibs      0.0000e+00
+  ibd      0.0000e+00
+  vgs     -3.9785e-01
+  vds     -3.9785e-01
+  vbs      0.0000e+00
+  vth     -4.1337e-01
+  vdsat   -4.9835e-02
+  vod      1.5520e-02
+  beta     1.5302e-03
+  gam eff  5.3068e-01
+  gm       1.7307e-05
+  gds      1.0468e-07
+  gmb      5.4999e-06
+  cdtot    3.5883e-14
+  cgtot    1.0453e-13
+  cstot    6.6662e-14
+  cbtot    8.2150e-14
+  cgs      6.4377e-14
+  cgd      1.5568e-14
+
+
+
+subckt  x1    
+ element x1.m14                 
+ model   cmosn               
+ region   Subth      
+  id       2.1443e-07
+  ibs      0.0000e+00
+  ibd      0.0000e+00
+  vgs      3.3812e-01
+  vds      3.8399e-01
+  vbs      0.0000e+00
+  vth      3.9668e-01
+  vdsat    3.7165e-02
+  vod     -5.8563e-02
+  beta     1.4573e-03
+  gam eff  5.7664e-01
+  gm       5.2077e-06
+  gds      2.1514e-08
+  gmb      1.5533e-06
+  cdtot    1.7294e-14
+  cgtot    7.2813e-14
+  cstot    3.0059e-14
+  cbtot    5.9497e-14
+  cgs      2.9080e-14
+  cgd      8.5230e-15
+
+
+
+subckt  x1    
+ element x1.m16                 
+ model   cmosp               
+ region   Subth      
+  id      -4.2786e-07
+  ibs      0.0000e+00
+  ibd      0.0000e+00
+  vgs     -3.9785e-01
+  vds     -3.9910e-02
+  vbs      0.0000e+00
+  vth     -3.9910e-01
+  vdsat   -5.2664e-02
+  vod      1.2473e-03
+  beta     8.2092e-04
+  gam eff  5.3074e-01
+  gm       8.4683e-06
+  gds      5.1015e-06
+  gmb      2.7114e-06
+  cdtot    5.2619e-14
+  cgtot    2.2704e-13
+  cstot    1.2060e-13
+  cbtot    1.4166e-13
+  cgs      1.5150e-13
+  cgd      2.8970e-14
+
+
+
+subckt  x1    
+ element x1.m12                 
+ model   cmosn               
+ region   Subth      
+  id       2.1343e-07
+  ibs      0.0000e+00
+  ibd      0.0000e+00
+  vgs      3.3812e-01
+  vds      3.3812e-01
+  vbs      0.0000e+00
+  vth      3.9672e-01
+  vdsat    3.7161e-02
+  vod     -5.8603e-02
+  beta     1.4573e-03
+  gam eff  5.7664e-01
+  gm       5.1845e-06
+  gds      2.2389e-08
+  gmb      1.5464e-06
+  cdtot    1.7389e-14
+  cgtot    7.2805e-14
+  cstot    3.0054e-14
+  cbtot    5.9592e-14
+  cgs      2.9067e-14
+  cgd      8.5248e-15
+
+
+
+subckt  x1    
+ element x1.m13                 
+ model   cmosp               
+ region   Subth      
+  id      -2.1342e-07
+  ibs      0.0000e+00
+  ibd      0.0000e+00
+  vgs     -3.6367e-01
+  vds     -1.2219e+00
+  vbs      3.9910e-02
+  vth     -4.1061e-01
+  vdsat   -4.3243e-02
+  vod      4.6939e-02
+  beta     8.1856e-04
+  gam eff  5.2982e-01
+  gm       4.8688e-06
+  gds      1.9074e-08
+  gmb      1.5347e-06
+  cdtot    3.5393e-14
+  cgtot    1.6323e-13
+  cstot    7.7440e-14
+  cbtot    1.2842e-13
+  cgs      7.8696e-14
+  cgd      1.7057e-14
+
+
+
+subckt  x1    
+ element x1.m15                 
+ model   cmosp               
+ region   Subth      
+  id      -2.1443e-07
+  ibs      0.0000e+00
+  ibd      0.0000e+00
+  vgs     -3.6406e-01
+  vds     -1.1761e+00
+  vbs      3.9910e-02
+  vth     -4.1066e-01
+  vdsat   -4.3293e-02
+  vod      4.6605e-02
+  beta     8.1853e-04
+  gam eff  5.2982e-01
+  gm       4.8909e-06
+  gds      1.9201e-08
+  gmb      1.5418e-06
+  cdtot    3.5546e-14
+  cgtot    1.6353e-13
+  cstot    7.7682e-14
+  cbtot    1.2858e-13
+  cgs      7.9117e-14
+  cgd      1.7056e-14
+
+
+

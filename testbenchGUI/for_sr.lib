@@ -1,0 +1,5 @@
+* Vp value for SR
+
+.lib vpval
+.param vp=0.1
+.endl vpval

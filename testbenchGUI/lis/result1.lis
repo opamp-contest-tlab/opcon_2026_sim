@@ -1,0 +1,958 @@
+ ****** HSPICE -- P-2019.06-SP2-2 linux64 (Feb  3 2020) ******                  
+  Copyright (c) 1986 - 2026 by Synopsys, Inc. All Rights Reserved.              
+  This software and the associated documentation are proprietary
+  to Synopsys, Inc. This software may only be used in accordance
+  with the terms and conditions of a written license agreement with
+  Synopsys, Inc. All other use, reproduction, or distribution of
+  this software is strictly prohibited.
+  Input File: sim1.sp                                                           
+  Command line options: /home/cad/tools/synopsys/hspice/latest/hspice/linux64/hspice -i sim1.sp -o /home/masubuchi.tsuyoshi/workspace/opcon_2026_sim/testbenchGUI/lis/result1.lis
+  Start time: Fri Sep 11 10:43:22 2026
+ lic:  
+ lic: FLEXlm: SDK_12.3 
+ lic: USER:   masubuchi.tsuyoshi   HOSTNAME: hestia.takai-lab.es.kit.ac.jp 
+ lic: HOSTID: "a0ad9f5d3a73"       PID:      523825 
+ lic: Using FLEXlm license file: 
+ lic: 27020@ganymede 
+ lic: Checkout 1 hspice 
+ lic: License/Maintenance for hspice will expire on 08-aug-2027/2026.03 
+ lic: 1(in_use)/40(total) FLOATING license(s) on SERVER 27020@ganymede 
+ lic:   
+  
+  ******  Machine Information  ***********************************
+  CPU:
+  model name	: Intel(R) Core(TM) Ultra 9 285K
+  cpu MHz	: 3700.000
+  
+  OS:
+  Linux version 4.18.0-553.123.1.el8_10.x86_64 (mockbuild@iad1-prod-build001.bld.equ.rockylinux.org) (gcc version 8.5.0 20210514 (Red Hat 8.5.0-28) (GCC)) #1 SMP Tue May 5 15:46:59 UTC 2026
+
+  ******  Loading Files  *****************************************
+  Loading 'lib/dc1.lib '
+  Loading '/home/cad/tools/synopsys/hspice/latest/hspice/hspice.ini '
+  Loading 'lib/settings.lib '
+  Loading '/home/masubuchi.tsuyoshi/workspace/opcon_2026_sim/testbenchGUI/lib/new018.mdl '
+  Loading 'tmp.sp '
+  Loading 'sim1.sp '
+ 
+
+  
+      
+ ******  Options set in the netlist  ****************************
+ converge= 1         cptime  = 180.00000  dcon    = 1         
+ ingold  = 2         lis_new = 1         measdg  = 5         
+ measform= 3         nomod   = 1         numdgt  = 5         
+ post    = 0         
+ search  = /home/cad/tools/synopsys/hspice/P-2019.06-SP2-2/hspice/parts/behave
+ statfl  = 1         strict_check= 1         
+ symb    = 1         unwrap  = 1         
+  
+  ******  Summary of possible problems in netlist  ***************
+  Negative resistor :      0
+  Negative capacitor:      0
+  Negative inductor :      0
+  Unconnected node  :      0
+  Dangling terminal :      0
+  Source loop       :      0
+  
+  ******  Circuit Statistics  ************************************
+  Resistors           :       3
+  Capacitors(total)   :       2
+     Coupling Capacitors :       2
+  Voltage Sources     :       3
+  MOSFETs             :      16
+  Total # of Nodes    :      16
+  Total # of Elements :      24
+
+
+  
+  ******  Analysis Details  **************************************
+ 
+  DC Beginning
+  100.00% Sweep1:1 Sweep2: 3 Estimated Time Left: 0:00:00        
+  DC End
+ ******
+ dc1
+
+ ****** dc transfer curves tnom=  25.000 temp= -40.000 ******
+  *** parameter step =   7.2000e-01       ***
+  
+ 
+  ******  Measured values for the netlist  ***********************
+ ivdd=-7.99098e-06
+ ivss=-7.99080e-06
+ ib= 7.99098e-06
+ pdis= 1.15070e-05
+ ******
+ dc1
+
+ ****** dc transfer curves tnom=  25.000 temp= -40.000 ******
+  *** parameter step =   8.0000e-01       ***
+  
+ ivdd=-9.83610e-06
+ ivss=-9.83591e-06
+ ib= 9.83610e-06
+ pdis= 1.57378e-05
+ ******
+ dc1
+
+ ****** dc transfer curves tnom=  25.000 temp= -40.000 ******
+  *** parameter step =   8.8000e-01       ***
+  
+ ivdd=-1.17121e-05
+ ivss=-1.17119e-05
+ ib= 1.17121e-05
+ pdis= 2.06132e-05
+ ******
+ dc1
+
+ ****** dc transfer curves tnom=  25.000 temp=  25.000 ******
+  *** parameter step =   7.2000e-01       ***
+  
+ ivdd=-7.45191e-06
+ ivss=-7.45170e-06
+ ib= 7.45191e-06
+ pdis= 1.07307e-05
+ ******
+ dc1
+
+ ****** dc transfer curves tnom=  25.000 temp=  25.000 ******
+  *** parameter step =   8.0000e-01       ***
+  
+ ivdd=-9.09778e-06
+ ivss=-9.09758e-06
+ ib= 9.09778e-06
+ pdis= 1.45564e-05
+ ******
+ dc1
+
+ ****** dc transfer curves tnom=  25.000 temp=  25.000 ******
+  *** parameter step =   8.8000e-01       ***
+  
+ ivdd=-1.07739e-05
+ ivss=-1.07737e-05
+ ib= 1.07739e-05
+ pdis= 1.89621e-05
+ ******
+ dc1
+
+ ****** dc transfer curves tnom=  25.000 temp=  80.000 ******
+  *** parameter step =   7.2000e-01       ***
+  
+ ivdd=-7.12754e-06
+ ivss=-7.12732e-06
+ ib= 7.12754e-06
+ pdis= 1.02637e-05
+ ******
+ dc1
+
+ ****** dc transfer curves tnom=  25.000 temp=  80.000 ******
+  *** parameter step =   8.0000e-01       ***
+  
+ ivdd=-8.64919e-06
+ ivss=-8.64897e-06
+ ib= 8.64919e-06
+ pdis= 1.38387e-05
+ ******
+ dc1
+
+ ****** dc transfer curves tnom=  25.000 temp=  80.000 ******
+  *** parameter step =   8.8000e-01       ***
+  
+ ivdd=-1.02018e-05
+ ivss=-1.02015e-05
+ ib= 1.02018e-05
+ pdis= 1.79551e-05
+
+          ***** job concluded
+ ****** HSPICE -- P-2019.06-SP2-2 linux64 (Feb  3 2020) ******                  
+ ******  
+ dc1
+
+ ****** job statistics summary tnom=  25.000 temp=  80.000 ******
+
+  ******  HSPICE Threads Information  ******
+
+  Command Line Threads Count :     1
+  Available CPU Count        :    24
+  Actual Threads Count       :     1
+
+
+
+  ******  Runtime Statistics (seconds)  ******
+
+  analysis           time    # points   tot. iter  conv.iter
+  op point           0.00           1           0
+  dc sweep           0.00           9         360
+  readin             0.02
+  errchk             0.00
+  setup              0.00
+  output             0.00
+
+
+           peak memory used        381.43 megabytes
+           total cpu time            0.03 seconds
+           total elapsed time        0.06 seconds
+           job started at     10:43:22 09/11/2026
+           job ended   at     10:43:22 09/11/2026
+  
+  ******  Machine Information  ***********************************
+  CPU:
+  model name	: Intel(R) Core(TM) Ultra 9 285K
+  cpu MHz	: 3700.000
+  
+  OS:
+  Linux version 4.18.0-553.123.1.el8_10.x86_64 (mockbuild@iad1-prod-build001.bld.equ.rockylinux.org) (gcc version 8.5.0 20210514 (Red Hat 8.5.0-28) (GCC)) #1 SMP Tue May 5 15:46:59 UTC 2026
+
+  ******  Loading Files  *****************************************
+  Loading 'lib/ac1.lib '
+  Loading 'lib/dc1.lib '
+  Loading '/home/cad/tools/synopsys/hspice/latest/hspice/hspice.ini '
+  Loading 'lib/settings.lib '
+  Loading '/home/masubuchi.tsuyoshi/workspace/opcon_2026_sim/testbenchGUI/lib/new018.mdl '
+  Loading 'tmp.sp '
+  Loading 'sim1.sp '
+  
+      
+ ******  Options set in the netlist  ****************************
+ converge= 1         cptime  = 180.00000  dcon    = 1         
+ ingold  = 2         lis_new = 1         measdg  = 5         
+ measform= 3         nomod   = 1         numdgt  = 5         
+ post    = 0         
+ search  = /home/cad/tools/synopsys/hspice/P-2019.06-SP2-2/hspice/parts/behave
+ statfl  = 1         strict_check= 1         
+ symb    = 1         unwrap  = 1         
+  ******  Analysis Details  **************************************
+  dcop: begin dcop, cpu clock= 6.49E-02                                         
+                                                  
+  dcop: begin pseudo transient                                                  
+                                                  
+  dcop: end pseudo transient                                                    
+                                                  
+  *** pseudo tran succeeded *** 
+
+
+
+
+ ****     small-signal transfer characteristics
+
+      v(out)/vin                               =  1.999e+00
+      input resistance at             vin      =  1.000e+20
+      output resistance at v(out)              =  5.638e-01
+
+
+
+  dcop: end dcop, cpu clock= 6.66E-02 peak memory=     380 mb tot_iter=      62 
+                                                  
+
+          ***** job concluded
+ ******  
+ ac1
+
+ ****** job statistics summary tnom=  25.000 temp=  25.000 ******
+
+
+  ******  Runtime Statistics (seconds)  ******
+
+  analysis           time    # points   tot. iter  conv.iter
+  op point           0.00           1          62
+  readin             0.00
+  errchk             0.00
+  setup              0.00
+  output             0.00
+
+
+           peak memory used        382.45 megabytes
+           total cpu time            0.00 seconds
+           total elapsed time        0.01 seconds
+           job started at     10:43:22 09/11/2026
+           job ended   at     10:43:22 09/11/2026
+  
+  ******  Machine Information  ***********************************
+  CPU:
+  model name	: Intel(R) Core(TM) Ultra 9 285K
+  cpu MHz	: 3700.000
+  
+  OS:
+  Linux version 4.18.0-553.123.1.el8_10.x86_64 (mockbuild@iad1-prod-build001.bld.equ.rockylinux.org) (gcc version 8.5.0 20210514 (Red Hat 8.5.0-28) (GCC)) #1 SMP Tue May 5 15:46:59 UTC 2026
+
+  ******  Loading Files  *****************************************
+  Loading 'lib/ac1.lib '
+  Loading 'lib/dc1.lib '
+  Loading '/home/cad/tools/synopsys/hspice/latest/hspice/hspice.ini '
+  Loading 'lib/settings.lib '
+  Loading '/home/masubuchi.tsuyoshi/workspace/opcon_2026_sim/testbenchGUI/lib/new018.mdl '
+  Loading 'tmp.sp '
+  Loading 'sim1.sp '
+  Loading 'lib/ac2.lib '
+  
+      
+ ******  Options set in the netlist  ****************************
+ converge= 1         cptime  = 180.00000  dcon    = 1         
+ ingold  = 2         lis_new = 1         measdg  = 5         
+ measform= 3         nomod   = 1         numdgt  = 5         
+ post    = 0         
+ search  = /home/cad/tools/synopsys/hspice/P-2019.06-SP2-2/hspice/parts/behave
+ statfl  = 1         strict_check= 1         
+ symb    = 1         unwrap  = 1         
+  ******  Analysis Details  **************************************
+  dcop: begin dcop, cpu clock= 7.05E-02                                         
+                                                  
+  dcop: begin pseudo transient                                                  
+                                                  
+  dcop: end pseudo transient                                                    
+                                                  
+  *** pseudo tran succeeded *** 
+  dcop: end dcop, cpu clock= 7.24E-02 peak memory=     380 mb tot_iter=      64 
+                                                  
+ 
+  AC Beginning
+  0.09% Elapsed Frequency: 1.00e-01meg Estimated Time Left: 0:01:17        
+  10.08% Elapsed Frequency: 1.26e+00meg Estimated Time Left: 0:00:00        
+  20.07% Elapsed Frequency: 1.58e+01meg Estimated Time Left: 0:00:00        
+  30.06% Elapsed Frequency: 2.00e+02meg Estimated Time Left: 0:00:00        
+  40.05% Elapsed Frequency: 2.51e+03meg Estimated Time Left: 0:00:00        
+  50.05% Elapsed Frequency: 3.16e+04meg Estimated Time Left: 0:00:00        
+  60.04% Elapsed Frequency: 3.98e+05meg Estimated Time Left: 0:00:00        
+  70.03% Elapsed Frequency: 5.01e+06meg Estimated Time Left: 0:00:00        
+  80.02% Elapsed Frequency: 6.31e+07meg Estimated Time Left: 0:00:00        
+  90.01% Elapsed Frequency: 7.94e+08meg Estimated Time Left: 0:00:00        
+  100.00% Elapsed Frequency: 1.00e+10meg Estimated Time Left: 0:00:00        
+  AC End
+ ******
+ ac2
+
+ ****** ac analysis tnom=  25.000 temp=  25.000 ******
+ 
+  ******  Measured values for the netlist  ***********************
+ dcgain= 6.94744e+04
+ dcgain_db= 9.68365e+01
+ ugf= 1.03714e+06
+ dcgain_half= 3.47372e+04
+ dcgain_db_half= 4.84182e+01
+ freq_half= 4.92019e+03
+ product_dcgain_freq= 1.70914e+08
+ gbw= 1.03714e+06
+ phase_min=-1.26433e+02    at= 1.03714e+06
+             from= 1.00000e-03    to= 1.03714e+06
+ pm= 5.35668e+01
+
+          ***** job concluded
+ ******  
+ ac2
+
+ ****** job statistics summary tnom=  25.000 temp=  25.000 ******
+
+
+  ******  Runtime Statistics (seconds)  ******
+
+  analysis           time    # points   tot. iter  conv.iter
+  op point           0.00           1          64
+  ac analysis        0.00        1101        1101
+  readin             0.00
+  errchk             0.00
+  setup              0.00
+  output             0.00
+
+
+           peak memory used        382.46 megabytes
+           total cpu time            0.01 seconds
+           total elapsed time        0.01 seconds
+           job started at     10:43:22 09/11/2026
+           job ended   at     10:43:22 09/11/2026
+  
+  ******  Machine Information  ***********************************
+  CPU:
+  model name	: Intel(R) Core(TM) Ultra 9 285K
+  cpu MHz	: 3700.000
+  
+  OS:
+  Linux version 4.18.0-553.123.1.el8_10.x86_64 (mockbuild@iad1-prod-build001.bld.equ.rockylinux.org) (gcc version 8.5.0 20210514 (Red Hat 8.5.0-28) (GCC)) #1 SMP Tue May 5 15:46:59 UTC 2026
+
+  ******  Loading Files  *****************************************
+  Loading 'lib/ac1.lib '
+  Loading 'lib/dc1.lib '
+  Loading '/home/cad/tools/synopsys/hspice/latest/hspice/hspice.ini '
+  Loading 'lib/settings.lib '
+  Loading '/home/masubuchi.tsuyoshi/workspace/opcon_2026_sim/testbenchGUI/lib/new018.mdl '
+  Loading 'tmp.sp '
+  Loading 'sim1.sp '
+  Loading 'lib/ac3.lib '
+  
+      
+ ******  Options set in the netlist  ****************************
+ converge= 1         cptime  = 180.00000  dcon    = 1         
+ ingold  = 2         lis_new = 1         measdg  = 5         
+ measform= 3         nomod   = 1         numdgt  = 5         
+ post    = 0         
+ search  = /home/cad/tools/synopsys/hspice/P-2019.06-SP2-2/hspice/parts/behave
+ statfl  = 1         strict_check= 1         
+ symb    = 1         unwrap  = 1         
+  ******  Analysis Details  **************************************
+  dcop: begin dcop, cpu clock= 8.28E-02                                         
+                                                  
+  dcop: begin pseudo transient                                                  
+                                                  
+  dcop: end pseudo transient                                                    
+                                                  
+  *** pseudo tran succeeded *** 
+  dcop: end dcop, cpu clock= 8.46E-02 peak memory=     380 mb tot_iter=      62 
+                                                  
+ 
+  AC Beginning
+  0.14% Elapsed Frequency: 1.00e-01meg Estimated Time Left: 0:00:58        
+  10.13% Elapsed Frequency: 5.01e-01meg Estimated Time Left: 0:00:00        
+  20.11% Elapsed Frequency: 2.51e+00meg Estimated Time Left: 0:00:00        
+  30.10% Elapsed Frequency: 1.26e+01meg Estimated Time Left: 0:00:00        
+  40.09% Elapsed Frequency: 6.31e+01meg Estimated Time Left: 0:00:00        
+  50.07% Elapsed Frequency: 3.16e+02meg Estimated Time Left: 0:00:00        
+  60.06% Elapsed Frequency: 1.58e+03meg Estimated Time Left: 0:00:00        
+  70.04% Elapsed Frequency: 7.94e+03meg Estimated Time Left: 0:00:00        
+  80.03% Elapsed Frequency: 3.98e+04meg Estimated Time Left: 0:00:00        
+  90.01% Elapsed Frequency: 2.00e+05meg Estimated Time Left: 0:00:00        
+  100.00% Elapsed Frequency: 1.00e+06meg Estimated Time Left: 0:00:00        
+  AC End
+ ******
+ ac3
+
+ ****** ac analysis tnom=  25.000 temp=  25.000 ******
+ 
+  ******  Measured values for the netlist  ***********************
+ input_noise= 1.31867e-05  from= 1.00000e-01     to= 1.00000e+06
+ irn= 3.63135e-03
+
+          ***** job concluded
+ ******  
+ ac3
+
+ ****** job statistics summary tnom=  25.000 temp=  25.000 ******
+
+
+  ******  Runtime Statistics (seconds)  ******
+
+  analysis           time    # points   tot. iter  conv.iter
+  op point           0.00           1          62
+  ac analysis        0.18         701         701
+  readin             0.00
+  errchk             0.00
+  setup              0.00
+  output             0.00
+
+
+           peak memory used        382.46 megabytes
+           total cpu time            0.19 seconds
+           total elapsed time        0.19 seconds
+           job started at     10:43:22 09/11/2026
+           job ended   at     10:43:23 09/11/2026
+  
+  ******  Machine Information  ***********************************
+  CPU:
+  model name	: Intel(R) Core(TM) Ultra 9 285K
+  cpu MHz	: 3700.000
+  
+  OS:
+  Linux version 4.18.0-553.123.1.el8_10.x86_64 (mockbuild@iad1-prod-build001.bld.equ.rockylinux.org) (gcc version 8.5.0 20210514 (Red Hat 8.5.0-28) (GCC)) #1 SMP Tue May 5 15:46:59 UTC 2026
+
+  ******  Loading Files  *****************************************
+  Loading 'lib/ac1.lib '
+  Loading 'lib/dc1.lib '
+  Loading '/home/cad/tools/synopsys/hspice/latest/hspice/hspice.ini '
+  Loading 'lib/settings.lib '
+  Loading '/home/masubuchi.tsuyoshi/workspace/opcon_2026_sim/testbenchGUI/lib/new018.mdl '
+  Loading 'tmp.sp '
+  Loading 'sim1.sp '
+  Loading 'lib/dc2.lib '
+  
+      
+ ******  Options set in the netlist  ****************************
+ converge= 1         cptime  = 180.00000  dcon    = 1         
+ ingold  = 2         lis_new = 1         measdg  = 5         
+ measform= 3         nomod   = 1         numdgt  = 5         
+ post    = 0         
+ search  = /home/cad/tools/synopsys/hspice/P-2019.06-SP2-2/hspice/parts/behave
+ statfl  = 1         strict_check= 1         
+ symb    = 1         unwrap  = 1         
+  ******  Analysis Details  **************************************
+  DC End
+ ******
+ dc2
+
+ ****** dc transfer curves tnom=  25.000 temp=  25.000 ******
+ 
+  ******  Measured values for the netlist  ***********************
+ psvoltage= 1.60000e+00
+
+          ***** job concluded
+ ******  
+ dc2
+
+ ****** job statistics summary tnom=  25.000 temp=  25.000 ******
+
+
+  ******  Runtime Statistics (seconds)  ******
+
+  analysis           time    # points   tot. iter  conv.iter
+  op point           0.00           1           0
+  dc sweep           0.01         160         347
+  readin             0.00
+  errchk             0.00
+  setup              0.00
+  output             0.00
+
+
+           peak memory used        382.46 megabytes
+           total cpu time            0.01 seconds
+           total elapsed time        0.02 seconds
+           job started at     10:43:22 09/11/2026
+           job ended   at     10:43:23 09/11/2026
+  
+  ******  Machine Information  ***********************************
+  CPU:
+  model name	: Intel(R) Core(TM) Ultra 9 285K
+  cpu MHz	: 3700.000
+  
+  OS:
+  Linux version 4.18.0-553.123.1.el8_10.x86_64 (mockbuild@iad1-prod-build001.bld.equ.rockylinux.org) (gcc version 8.5.0 20210514 (Red Hat 8.5.0-28) (GCC)) #1 SMP Tue May 5 15:46:59 UTC 2026
+
+  ******  Loading Files  *****************************************
+  Loading 'lib/ac1.lib '
+  Loading 'lib/dc1.lib '
+  Loading '/home/cad/tools/synopsys/hspice/latest/hspice/hspice.ini '
+  Loading 'lib/settings.lib '
+  Loading '/home/masubuchi.tsuyoshi/workspace/opcon_2026_sim/testbenchGUI/lib/new018.mdl '
+  Loading 'tmp.sp '
+  Loading 'sim1.sp '
+  Loading 'lib/tran1.lib '
+  **info** (lib/tran1.lib:6) DC voltage reset to initial transient source value in source 0:vdd. new dc=0.0000D+00
+  
+      
+ ******  Options set in the netlist  ****************************
+ converge= 1         cptime  = 180.00000  dcon    = 1         
+ ingold  = 2         lis_new = 1         measdg  = 5         
+ measform= 3         nomod   = 1         numdgt  = 5         
+ post    = 0         
+ search  = /home/cad/tools/synopsys/hspice/P-2019.06-SP2-2/hspice/parts/behave
+ statfl  = 1         strict_check= 1         
+ symb    = 1         unwrap  = 1         
+  ******  Analysis Details  **************************************
+  dcop: begin dcop, cpu clock= 2.95E-01                                         
+                                                  
+  dcop: begin pseudo transient                                                  
+                                                  
+  dcop: end pseudo transient                                                    
+                                                  
+  *** pseudo tran succeeded *** 
+ ******  
+ tran1
+
+ ****** transient analysis tnom=  25.000 temp=  25.000 ******
+  dcop: end dcop, cpu clock= 2.96E-01 peak memory=     381 mb tot_iter=      43 
+                                                  
+ 
+  Transient Beginning
+  Transient End
+ fourier components of transient response v(out)
+ dc component =  4.17677e-06
+  
+ harmonic frequency    fourier      normalized   phase        normalized   
+ no       (hz)         component    component    (deg)        phase (deg)  
+ 1         1.00000e+02  4.94441e-03  1.00000e+00 -9.00087e+01  0.00000e+00 
+ 2         2.00000e+02  1.96979e-09  3.98387e-07  3.76690e+01  1.27678e+02 
+ 3         3.00000e+02  2.08491e-05  4.21670e-03  9.00354e+01  1.80044e+02 
+ 4         4.00000e+02  1.64447e-08  3.32591e-06  9.05063e+01  1.80515e+02 
+ 5         5.00000e+02  7.42601e-07  1.50190e-04 -9.20042e+01 -1.99548e+00 
+ 6         6.00000e+02  3.72891e-09  7.54166e-07  9.83007e+01  1.88309e+02 
+ 7         7.00000e+02  1.01879e-05  2.06048e-03 -9.01689e+01 -1.60239e-01 
+ 8         8.00000e+02  9.98636e-09  2.01973e-06 -8.98841e+01  1.24644e-01 
+ 9         9.00000e+02  5.41049e-06  1.09426e-03  9.00429e+01  1.80052e+02 
+  
+ total harmonic distortion =   0.482143  percent
+
+          ***** job concluded
+ ******  
+ tran1
+
+ ****** job statistics summary tnom=  25.000 temp=  25.000 ******
+
+
+  ******  Runtime Statistics (seconds)  ******
+
+  analysis           time    # points   tot. iter  conv.iter
+  op point           0.00           1          43
+  transient          0.02     1000001        3351        1655 rev=         0
+  readin             0.00
+  errchk             0.00
+  setup              0.00
+  output             0.00
+
+
+           peak memory used        383.45 megabytes
+           total cpu time            0.03 seconds
+           total elapsed time        0.03 seconds
+           job started at     10:43:22 09/11/2026
+           job ended   at     10:43:23 09/11/2026
+  
+  ******  Machine Information  ***********************************
+  CPU:
+  model name	: Intel(R) Core(TM) Ultra 9 285K
+  cpu MHz	: 3700.000
+  
+  OS:
+  Linux version 4.18.0-553.123.1.el8_10.x86_64 (mockbuild@iad1-prod-build001.bld.equ.rockylinux.org) (gcc version 8.5.0 20210514 (Red Hat 8.5.0-28) (GCC)) #1 SMP Tue May 5 15:46:59 UTC 2026
+
+  ******  Loading Files  *****************************************
+  Loading 'lib/ac1.lib '
+  Loading 'lib/dc1.lib '
+  Loading '/home/cad/tools/synopsys/hspice/latest/hspice/hspice.ini '
+  Loading 'lib/settings.lib '
+  Loading '/home/masubuchi.tsuyoshi/workspace/opcon_2026_sim/testbenchGUI/lib/new018.mdl '
+  Loading 'tmp.sp '
+  Loading 'sim1.sp '
+  Loading 'lib/ac4.lib '
+  
+      
+ ******  Options set in the netlist  ****************************
+ converge= 1         cptime  = 180.00000  dcon    = 1         
+ ingold  = 2         lis_new = 1         measdg  = 5         
+ measform= 3         nomod   = 1         numdgt  = 5         
+ post    = 0         
+ search  = /home/cad/tools/synopsys/hspice/P-2019.06-SP2-2/hspice/parts/behave
+ statfl  = 1         strict_check= 1         
+ symb    = 1         unwrap  = 1         
+  ******  Analysis Details  **************************************
+  dcop: begin dcop, cpu clock= 3.23E-01                                         
+                                                  
+  dcop: begin pseudo transient                                                  
+                                                  
+  dcop: end pseudo transient                                                    
+                                                  
+  *** pseudo tran succeeded *** 
+  dcop: end dcop, cpu clock= 3.25E-01 peak memory=     381 mb tot_iter=      64 
+                                                  
+ 
+  AC Beginning
+  0.09% Elapsed Frequency: 1.00e-01meg Estimated Time Left: 0:05:56        
+  10.08% Elapsed Frequency: 1.26e+00meg Estimated Time Left: 0:00:02        
+  20.07% Elapsed Frequency: 1.58e+01meg Estimated Time Left: 0:00:01        
+  30.06% Elapsed Frequency: 2.00e+02meg Estimated Time Left: 0:00:00        
+  40.05% Elapsed Frequency: 2.51e+03meg Estimated Time Left: 0:00:00        
+  50.05% Elapsed Frequency: 3.16e+04meg Estimated Time Left: 0:00:00        
+  60.04% Elapsed Frequency: 3.98e+05meg Estimated Time Left: 0:00:00        
+  70.03% Elapsed Frequency: 5.01e+06meg Estimated Time Left: 0:00:00        
+  80.02% Elapsed Frequency: 6.31e+07meg Estimated Time Left: 0:00:00        
+  90.01% Elapsed Frequency: 7.94e+08meg Estimated Time Left: 0:00:00        
+  100.00% Elapsed Frequency: 1.00e+10meg Estimated Time Left: 0:00:00        
+  AC End
+ ******
+ ac4
+
+ ****** ac analysis tnom=  25.000 temp=  25.000 ******
+ 
+  ******  Measured values for the netlist  ***********************
+ cmrr= 1.41664e+02    at= 1.00000e-01
+             from= 1.00000e-01    to= 1.00000e+10
+
+          ***** job concluded
+ ******  
+ ac4
+
+ ****** job statistics summary tnom=  25.000 temp=  25.000 ******
+
+
+  ******  Runtime Statistics (seconds)  ******
+
+  analysis           time    # points   tot. iter  conv.iter
+  op point           0.00           1          64
+  ac analysis        0.01        1101        1101
+  readin             0.00
+  errchk             0.00
+  setup              0.00
+  output             0.00
+
+
+           peak memory used        383.45 megabytes
+           total cpu time            0.01 seconds
+           total elapsed time        0.02 seconds
+           job started at     10:43:22 09/11/2026
+           job ended   at     10:43:23 09/11/2026
+  
+  ******  Machine Information  ***********************************
+  CPU:
+  model name	: Intel(R) Core(TM) Ultra 9 285K
+  cpu MHz	: 3700.000
+  
+  OS:
+  Linux version 4.18.0-553.123.1.el8_10.x86_64 (mockbuild@iad1-prod-build001.bld.equ.rockylinux.org) (gcc version 8.5.0 20210514 (Red Hat 8.5.0-28) (GCC)) #1 SMP Tue May 5 15:46:59 UTC 2026
+
+  ******  Loading Files  *****************************************
+  Loading 'lib/ac1.lib '
+  Loading 'lib/dc1.lib '
+  Loading '/home/cad/tools/synopsys/hspice/latest/hspice/hspice.ini '
+  Loading 'lib/settings.lib '
+  Loading '/home/masubuchi.tsuyoshi/workspace/opcon_2026_sim/testbenchGUI/lib/new018.mdl '
+  Loading 'tmp.sp '
+  Loading 'sim1.sp '
+  Loading 'lib/ac5.lib '
+  
+      
+ ******  Options set in the netlist  ****************************
+ converge= 1         cptime  = 180.00000  dcon    = 1         
+ ingold  = 2         lis_new = 1         measdg  = 5         
+ measform= 3         nomod   = 1         numdgt  = 5         
+ post    = 0         
+ search  = /home/cad/tools/synopsys/hspice/P-2019.06-SP2-2/hspice/parts/behave
+ statfl  = 1         strict_check= 1         
+ symb    = 1         unwrap  = 1         
+  ******  Analysis Details  **************************************
+  dcop: begin dcop, cpu clock= 3.39E-01                                         
+                                                  
+  dcop: begin pseudo transient                                                  
+                                                  
+  dcop: end pseudo transient                                                    
+                                                  
+  *** pseudo tran succeeded *** 
+  dcop: end dcop, cpu clock= 3.41E-01 peak memory=     381 mb tot_iter=      64 
+                                                  
+ 
+  AC Beginning
+  0.99% Elapsed Frequency: 1.00e-01meg Estimated Time Left: 0:00:33        
+  10.89% Elapsed Frequency: 1.26e-01meg Estimated Time Left: 0:00:02        
+  20.79% Elapsed Frequency: 1.58e-01meg Estimated Time Left: 0:00:01        
+  30.69% Elapsed Frequency: 2.00e-01meg Estimated Time Left: 0:00:00        
+  40.59% Elapsed Frequency: 2.51e-01meg Estimated Time Left: 0:00:00        
+  50.50% Elapsed Frequency: 3.16e-01meg Estimated Time Left: 0:00:00        
+  60.40% Elapsed Frequency: 3.98e-01meg Estimated Time Left: 0:00:00        
+  70.30% Elapsed Frequency: 5.01e-01meg Estimated Time Left: 0:00:00        
+  80.20% Elapsed Frequency: 6.31e-01meg Estimated Time Left: 0:00:00        
+  90.10% Elapsed Frequency: 7.94e-01meg Estimated Time Left: 0:00:00        
+  100.00% Elapsed Frequency: 1.00e+00meg Estimated Time Left: 0:00:00        
+  AC End
+ ******
+ ac5
+
+ ****** ac analysis tnom=  25.000 temp=  25.000 ******
+ 
+  ******  Measured values for the netlist  ***********************
+ pd= 1.44367e+02
+ ps= 1.30826e+02
+ psrr= 1.30826e+02
+
+          ***** job concluded
+ ******  
+ ac5
+
+ ****** job statistics summary tnom=  25.000 temp=  25.000 ******
+
+
+  ******  Runtime Statistics (seconds)  ******
+
+  analysis           time    # points   tot. iter  conv.iter
+  op point           0.00           1          64
+  ac analysis        0.00         101         101
+  readin             0.00
+  errchk             0.00
+  setup              0.00
+  output             0.00
+
+
+           peak memory used        383.45 megabytes
+           total cpu time            0.01 seconds
+           total elapsed time        0.01 seconds
+           job started at     10:43:22 09/11/2026
+           job ended   at     10:43:23 09/11/2026
+  
+  ******  Machine Information  ***********************************
+  CPU:
+  model name	: Intel(R) Core(TM) Ultra 9 285K
+  cpu MHz	: 3700.000
+  
+  OS:
+  Linux version 4.18.0-553.123.1.el8_10.x86_64 (mockbuild@iad1-prod-build001.bld.equ.rockylinux.org) (gcc version 8.5.0 20210514 (Red Hat 8.5.0-28) (GCC)) #1 SMP Tue May 5 15:46:59 UTC 2026
+
+  ******  Loading Files  *****************************************
+  Loading 'lib/ac1.lib '
+  Loading 'lib/dc1.lib '
+  Loading '/home/cad/tools/synopsys/hspice/latest/hspice/hspice.ini '
+  Loading 'lib/settings.lib '
+  Loading '/home/masubuchi.tsuyoshi/workspace/opcon_2026_sim/testbenchGUI/lib/new018.mdl '
+  Loading 'tmp.sp '
+  Loading 'sim1.sp '
+  Loading 'lib/dc3.lib '
+  
+      
+ ******  Options set in the netlist  ****************************
+ converge= 1         cptime  = 180.00000  dcon    = 1         
+ ingold  = 2         lis_new = 1         measdg  = 5         
+ measform= 3         nomod   = 1         numdgt  = 5         
+ post    = 0         
+ search  = /home/cad/tools/synopsys/hspice/P-2019.06-SP2-2/hspice/parts/behave
+ statfl  = 1         strict_check= 1         
+ symb    = 1         unwrap  = 1         
+  ******  Analysis Details  **************************************
+  DC End
+ ******
+ dc3
+
+ ****** dc transfer curves tnom=  25.000 temp=  25.000 ******
+ 
+  ******  Measured values for the netlist  ***********************
+ psvoltage= 1.60000e+00
+
+          ***** job concluded
+ ******  
+ dc3
+
+ ****** job statistics summary tnom=  25.000 temp=  25.000 ******
+
+
+  ******  Runtime Statistics (seconds)  ******
+
+  analysis           time    # points   tot. iter  conv.iter
+  op point           0.00           1           0
+  dc sweep           0.00          80         221
+  readin             0.00
+  errchk             0.00
+  setup              0.00
+  output             0.00
+
+
+           peak memory used        383.45 megabytes
+           total cpu time            0.01 seconds
+           total elapsed time        0.01 seconds
+           job started at     10:43:22 09/11/2026
+           job ended   at     10:43:23 09/11/2026
+  
+  ******  Machine Information  ***********************************
+  CPU:
+  model name	: Intel(R) Core(TM) Ultra 9 285K
+  cpu MHz	: 3700.000
+  
+  OS:
+  Linux version 4.18.0-553.123.1.el8_10.x86_64 (mockbuild@iad1-prod-build001.bld.equ.rockylinux.org) (gcc version 8.5.0 20210514 (Red Hat 8.5.0-28) (GCC)) #1 SMP Tue May 5 15:46:59 UTC 2026
+
+  ******  Loading Files  *****************************************
+  Loading 'lib/ac1.lib '
+  Loading 'lib/dc1.lib '
+  Loading '/home/cad/tools/synopsys/hspice/latest/hspice/hspice.ini '
+  Loading 'lib/settings.lib '
+  Loading '/home/masubuchi.tsuyoshi/workspace/opcon_2026_sim/testbenchGUI/lib/new018.mdl '
+  Loading 'tmp.sp '
+  Loading 'sim1.sp '
+  Loading 'lib/dc4.lib '
+  
+      
+ ******  Options set in the netlist  ****************************
+ converge= 1         cptime  = 180.00000  dcon    = 1         
+ ingold  = 2         lis_new = 1         measdg  = 5         
+ measform= 3         nomod   = 1         numdgt  = 5         
+ post    = 0         
+ search  = /home/cad/tools/synopsys/hspice/P-2019.06-SP2-2/hspice/parts/behave
+ statfl  = 1         strict_check= 1         
+ symb    = 1         unwrap  = 1         
+  ******  Analysis Details  **************************************
+ convergence problems in dc sweep curves at -0.38400    
+  resimulating with dc convergence controls
+
+  DC End
+ ******
+ dc4
+
+ ****** dc transfer curves tnom=  25.000 temp=  25.000 ******
+ 
+  ******  Measured values for the netlist  ***********************
+ ibd=-9.09778e-06
+ ibs=-9.09758e-06
+ ib_tt= 9.09778e-06
+ pdis_tt= 1.45564e-05
+
+          ***** job concluded
+ ******  
+ dc4
+
+ ****** job statistics summary tnom=  25.000 temp=  25.000 ******
+
+
+  ******  Runtime Statistics (seconds)  ******
+
+  analysis           time    # points   tot. iter  conv.iter
+  op point           0.00           1           0
+  dc sweep           0.01         101         587
+  readin             0.00
+  errchk             0.00
+  setup              0.00
+  output             0.00
+
+
+           peak memory used        383.45 megabytes
+           total cpu time            0.01 seconds
+           total elapsed time        0.01 seconds
+           job started at     10:43:22 09/11/2026
+           job ended   at     10:43:23 09/11/2026
+  
+  ******  Machine Information  ***********************************
+  CPU:
+  model name	: Intel(R) Core(TM) Ultra 9 285K
+  cpu MHz	: 3700.000
+  
+  OS:
+  Linux version 4.18.0-553.123.1.el8_10.x86_64 (mockbuild@iad1-prod-build001.bld.equ.rockylinux.org) (gcc version 8.5.0 20210514 (Red Hat 8.5.0-28) (GCC)) #1 SMP Tue May 5 15:46:59 UTC 2026
+
+  ******  Loading Files  *****************************************
+  Loading 'lib/ac1.lib '
+  Loading 'lib/dc1.lib '
+  Loading '/home/cad/tools/synopsys/hspice/latest/hspice/hspice.ini '
+  Loading 'lib/settings.lib '
+  Loading '/home/masubuchi.tsuyoshi/workspace/opcon_2026_sim/testbenchGUI/lib/new018.mdl '
+  Loading 'tmp.sp '
+  Loading 'sim1.sp '
+  Loading 'lib/srdc.lib '
+  
+      
+ ******  Options set in the netlist  ****************************
+ converge= 1         cptime  = 180.00000  dcon    = 1         
+ ingold  = 2         lis_new = 1         measdg  = 5         
+ measform= 3         nomod   = 1         numdgt  = 5         
+ post    = 0         
+ search  = /home/cad/tools/synopsys/hspice/P-2019.06-SP2-2/hspice/parts/behave
+ statfl  = 1         strict_check= 1         
+ symb    = 1         unwrap  = 1         
+  ******  Analysis Details  **************************************
+  DC End
+ ******
+ srdc
+
+ ****** dc transfer curves tnom=  25.000 temp=  25.000 ******
+ 
+  ******  Measured values for the netlist  ***********************
+ vpmax=   failed
+ vnmax=   failed
+ amp=   failed
+
+          ***** job concluded
+ ******  
+ srdc
+
+ ****** job statistics summary tnom=  25.000 temp=  25.000 ******
+
+
+  ******  Runtime Statistics (seconds)  ******
+
+  analysis           time    # points   tot. iter  conv.iter
+  op point           0.00           1           0
+  dc sweep           0.00          80         169
+  readin             0.00
+  errchk             0.00
+  setup              0.00
+  output             0.00
+
+
+           peak memory used        383.45 megabytes
+           total cpu time            0.01 seconds
+           total elapsed time        0.01 seconds
+           job started at     10:43:22 09/11/2026
+           job ended   at     10:43:23 09/11/2026
+           job total runtime         0.37 seconds
+
+
+ lic: Release hspice token(s) 
+ lic: total license checkout elapse time:        0.03(s)

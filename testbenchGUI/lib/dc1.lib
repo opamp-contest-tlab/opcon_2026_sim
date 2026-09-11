@@ -11,7 +11,8 @@ R1	s 0			valr1
 R2	out s			valr2
  
 .PARAM half='psvoltage/2' valr1=10k valr2=10k
-.DC VIN -0.01 0.01 0.01 SWEEP step POI 3 '0.9*half' 'half' '1.1*half'
+* .DC VIN -0.01 0.01 0.01 SWEEP step POI 3 '0.9*half' 'half' '1.1*half'
+.DC VIN -0.1 0.1 0.1 SWEEP step POI 3 '0.9*half' 'half' '1.1*half'
 .TEMP -40 25 80
 
 .MEAS DC ivdd FIND I(VDD) AT=0

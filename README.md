@@ -71,3 +71,30 @@ python3 testbenchGUI/testbench.py
 - `simulatinon_results.md`：性能表と SR 波形プレビュー（プロジェクトルート）
 
 `tmp.sp`、`for_sr.lib`、HSPICE の `.lis`・測定 CSV などの一時ファイルは、シミュレーション終了時に削除されます。HSPICE が見つからない場合は、`hspice` コマンドが PATH に登録されているか、また HSPICE の実行ライセンスが利用可能か確認してください。
+
+## JSON 結果の比較プロット
+
+2つのフォルダ配下を再帰的に検索し、同じファイル名の JSON にある共通の数値キーを性能ごとに比較します。性能キーごとに1枚の散布図を生成し、横軸をフォルダ A の値、縦軸をフォルダ B の値にします。破線の `y=x` 上にある点は一致し、緑は `MATCH`、赤は `DIFFERENT` です。全データは CSV にも出力します。
+
+`tools/compare_json_dirs.py` の先頭にある `DIR_A`、`DIR_B`、`OUTPUT`、`COMPARE_KEYS` を設定してから実行します。
+
+```python
+DIR_A = Path("/path/to/result_a")
+DIR_B = Path("/path/to/result_b")
+OUTPUT = Path("json_comparison")
+COMPARE_KEYS = [("gain.dc", "dc_gain"), ("phase_margin", "pm")]
+```
+
+`COMPARE_KEYS` は `(DIR_A 側キー, DIR_B 側キー)` の組を複数指定できます。空リストなら両方にある同名キーをすべて比較します。同一フォルダ内に同名の JSON が複数ある場合は、比較先が曖昧になるためエラーにします。
+
+出力先には性能別 PNG、全比較結果の `comparison.csv`、および性能ごとに不一致となった JSON ファイル名の一覧 `DIFF_json_files_<性能キー>.txt` が作成されます。SR（`values.sr` / `results.sr`）については一覧ファイルを作成しません。
+
+```bash
+python3.11 tools/compare_json_dirs.py
+```
+
+
+OVRの.dcがHPのネットリストと一致していること
+-> 一致していることを確認しました
+
+出力電流が

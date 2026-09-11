@@ -15,7 +15,7 @@ R2a     inp1 0                  'rload/2'
 R3a     in1 inm1                'rload/2'
 R4a     inm1 out1               rload
 E1a     out1 0 outx1 0          bgain
-R5a     outx1 0                 rload
+* R5a     outx1 0                 rload
  
 * Negative side
 X1b     inm2 inp2 outx2 vdd vss opamp
@@ -24,21 +24,28 @@ R2b     inp2 0                  'rload/2'
 R3b     in2 inm2                'rload/2'
 R4b     inm2 out2               rload
 E1b     out2 0 outx2 0          bgain
-R5b     outx2 0                 rload
+* R5b     outx2 0                 rload
  
 * offset voltage
 X2      inm3 0 osx vdd vss      opamp
 R12     0 inm3                  'rload/2'
 R22     inm3 os                 rload
 E2      os 0 osx 0              bgain
-R32     osx 0                   rload
+* R32     osx 0                   rload
  
 .PARAM half='psvoltage/2' rload=20k bgain=10
-.DC VIN 10m psvoltage '(psvoltage-10m)/100'
+* 新ルール
+*.DC VIN 10m psvoltage '(psvoltage-10m)/100'
+* 旧ルール
+.DC VIN 10m psvoltage 10m
+
+* PRINTからPythonで条件式で持って来るように設定
 .PRINT V(out1,os) V(out2,os)
 * + PAR'1-ABS(V(out1,os))/(0.5*V(in1))' PAR'1-ABS(V(out2,os))/(0.5*V(in1))'
-.MEAS DC cmr1 FIND V(in1) WHEN PAR'abs(1-abs(V(out1,os)/(0.5*V(in1))))'=0.05 
-.MEAS DC cmr2 FIND V(in1) WHEN PAR'abs(1-abs(V(out2,os)/(0.5*V(in1))))'=0.05
-.MEAS DC cmr PARAM='0.5*(cmr1+cmr2)/psvoltage*100'
+* ABSが足りてないんじゃないか説
++ PAR'ABS(1-ABS(V(out1,os))/(0.5*V(in1)))' PAR'ABS(1-ABS(V(out2,os))/(0.5*V(in1)))'
+* .MEAS DC cmr1 FIND V(in1) WHEN PAR'abs(1-abs(V(out1,os)/(0.5*V(in1))))'=0.05 
+* .MEAS DC cmr2 FIND V(in1) WHEN PAR'abs(1-abs(V(out2,os)/(0.5*V(in1))))'=0.05
+* .MEAS DC cmr PARAM='0.5*(cmr1+cmr2)/psvoltage*100'
 .MEAS DC psvoltage PARAM=psvoltage
 .endl dc2

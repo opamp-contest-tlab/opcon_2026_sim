@@ -1,0 +1,149 @@
+ ****** HSPICE -- P-2019.06-SP2-2 linux64 (Feb  3 2020) ******                  
+  Copyright (c) 1986 - 2026 by Synopsys, Inc. All Rights Reserved.              
+  This software and the associated documentation are proprietary
+  to Synopsys, Inc. This software may only be used in accordance
+  with the terms and conditions of a written license agreement with
+  Synopsys, Inc. All other use, reproduction, or distribution of
+  this software is strictly prohibited.
+  Input File: sim2.sp                                                           
+  Command line options: /home/cad/tools/synopsys/hspice/latest/hspice/linux64/hspice -i sim2.sp -o /home/masubuchi.tsuyoshi/workspace/opcon_2026_sim/testbenchGUI/lis/result2.lis
+  Start time: Fri Sep 11 10:43:23 2026
+ lic:  
+ lic: FLEXlm: SDK_12.3 
+ lic: USER:   masubuchi.tsuyoshi   HOSTNAME: hestia.takai-lab.es.kit.ac.jp 
+ lic: HOSTID: "a0ad9f5d3a73"       PID:      523849 
+ lic: Using FLEXlm license file: 
+ lic: 27020@ganymede 
+ lic: Checkout 1 hspice 
+ lic: License/Maintenance for hspice will expire on 08-aug-2027/2026.03 
+ lic: 1(in_use)/40(total) FLOATING license(s) on SERVER 27020@ganymede 
+ lic:   
+  
+  ******  Machine Information  ***********************************
+  CPU:
+  model name	: Intel(R) Core(TM) Ultra 9 285K
+  cpu MHz	: 3700.000
+  
+  OS:
+  Linux version 4.18.0-553.123.1.el8_10.x86_64 (mockbuild@iad1-prod-build001.bld.equ.rockylinux.org) (gcc version 8.5.0 20210514 (Red Hat 8.5.0-28) (GCC)) #1 SMP Tue May 5 15:46:59 UTC 2026
+
+  ******  Loading Files  *****************************************
+  Loading '/home/cad/tools/synopsys/hspice/latest/hspice/hspice.ini '
+  Loading 'lib/settings.lib '
+  Loading '/home/masubuchi.tsuyoshi/workspace/opcon_2026_sim/testbenchGUI/lib/new018.mdl '
+  Loading 'tmp.sp '
+  Loading 'sim2.sp '
+  Loading 'for_sr.lib '
+  Loading 'lib/sr.lib '
+  **info** (lib/sr.lib:24) DC voltage reset to initial transient source value in source 0:vin1. new dc=-0.1000D+00
+ 
+
+  
+      
+ ******  Options set in the netlist  ****************************
+ converge= 1         cptime  = 180.00000  dcon    = 1         
+ ingold  = 2         lis_new = 1         measdg  = 5         
+ measform= 3         nomod   = 1         numdgt  = 5         
+ post    = 0         
+ search  = /home/cad/tools/synopsys/hspice/P-2019.06-SP2-2/hspice/parts/behave
+ statfl  = 1         strict_check= 1         
+ symb    = 1         unwrap  = 1         
+  
+  ******  Summary of possible problems in netlist  ***************
+  Negative resistor :      0
+  Negative capacitor:      0
+  Negative inductor :      0
+  Unconnected node  :      0
+  Dangling terminal :      0
+  Source loop       :      0
+  
+  ******  Circuit Statistics  ************************************
+  Resistors           :       9
+  Capacitors(total)   :       6
+     Coupling Capacitors :       6
+  VCVS                :       1
+  Voltage Sources     :       3
+  MOSFETs             :      48
+  Total # of Nodes    :      41
+  Total # of Elements :      67
+
+
+  
+  ******  Analysis Details  **************************************
+  dcop: begin dcop, cpu clock= 4.81E-02                                         
+                                                  
+  dcop: begin pseudo transient                                                  
+                                                  
+  dcop: end pseudo transient                                                    
+                                                  
+  *** pseudo tran succeeded *** 
+ ****** HSPICE -- P-2019.06-SP2-2 linux64 (Feb  3 2020) ******                  
+ ******  
+ sr
+
+ ****** transient analysis tnom=  25.000 temp=  25.000 ******
+  dcop: end dcop, cpu clock= 4.96E-02 peak memory=     380 mb tot_iter=      89 
+                                                  
+ 
+  Transient Beginning
+  100.00% Tran Time= 4.00000e-04s Estimated Time Left: 0:00:00        
+  Transient End
+ ******
+ sr
+
+ ****** transient analysis tnom=  25.000 temp=  25.000 ******
+ 
+  ******  Measured values for the netlist  ***********************
+ vo1min=-1.99996e-01
+ vo1max= 1.99786e-01
+ vo1f= 9.99985e-02
+ vi1f= 5.00000e-02
+ srr1= 8.71059e+10
+ srr2= 4.07552e+05
+ srr3= 1.99973e+05
+ srr= 2.90355e+10
+ vo2max= 1.99788e-01
+ vo2min=-1.99995e-01
+ vo2f=-9.99895e-02
+ vi2f=-5.00000e-02
+ srf1=-8.21511e+10
+ srf2=-2.92014e+03
+ srf3=-1.65565e+05
+ srf=-2.73838e+10
+ sr= 2.73838e+10
+
+          ***** job concluded
+ ******  
+ sr
+
+ ****** job statistics summary tnom=  25.000 temp=  25.000 ******
+
+  ******  HSPICE Threads Information  ******
+
+  Command Line Threads Count :     1
+  Available CPU Count        :    24
+  Actual Threads Count       :     1
+
+
+
+  ******  Runtime Statistics (seconds)  ******
+
+  analysis           time    # points   tot. iter  conv.iter
+  op point           0.00           1          89
+  transient          0.01      400001         427         187 rev=         9
+  readin             0.02
+  errchk             0.00
+  setup              0.00
+  output             0.00
+
+
+           peak memory used        389.64 megabytes
+           total cpu time            0.40 seconds
+           total elapsed time        0.42 seconds
+           job started at     10:43:23 09/11/2026
+           job ended   at     10:43:23 09/11/2026
+           job total runtime         0.42 seconds
+
+
+ lic: Release hspice token(s) 
+ lic: total license checkout elapse time:        0.03(s)

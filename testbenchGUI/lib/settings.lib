@@ -18,12 +18,14 @@
 +   POST=0
 +   UNWRAP
 +   STRICT_CHECK=1
-+   ACOUT=1
+*+   ACOUT=1
 +   SYMB=1
-+   CPTIME=60
+* SRのstepのせいで時間かかるので180にする
++   CPTIME=180
 +   NOMOD
 +   STATFL=1
 +   MEASFORM=3
++   LIS_NEW=1
 .SAVE LEVEL = NONE
 **********************
 
@@ -49,12 +51,14 @@
 +   POST=0
 +   UNWRAP
 +   STRICT_CHECK=1
-+   ACOUT=1
+*+   ACOUT=1
 +   SYMB=1
-+   CPTIME=60
+* SRのstepのせいで時間かかるので180にする
++   CPTIME=180
 +   NOMOD
 +   STATFL=1
 +   MEASFORM=3
++   LIS_NEW=1
 .SAVE LEVEL = NONE
 **********************
 

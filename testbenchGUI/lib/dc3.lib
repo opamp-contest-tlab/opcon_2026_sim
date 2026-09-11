@@ -23,12 +23,15 @@ R1c     0 inm3                  rload
 R2c     inm3 os                 rload
  
 .PARAM half='psvoltage/2' rload=20k
-.DC VIN 10m half '(half-10m)/100'
+* 新ルール
+* .DC VIN 10m half '(half-10m)/100'
+* 旧ルール
+.DC VIN 10m half 10m
 .PRINT V(out1,os) V(out2,os)
-* + PAR'1-ABS(V(out1,os))/V(in1)' PAR'1-ABS(V(out2,os))/V(in1)'
-.MEAS DC ovr1 FIND V(in1) WHEN PAR'1-abs(V(out1,os)/V(in1))'=0.05
-.MEAS DC ovr2 FIND V(in1) WHEN PAR'1-abs(V(out2,os)/V(in1))'=0.05
-.MEAS DC ovr PARAM='(abs(ovr1)+abs(ovr2))/psvoltage*100'
++ PAR'ABS(1-ABS(V(out1,os))/V(in1))' PAR'ABS(1-ABS(V(out2,os))/V(in1))'
+*.MEAS DC ovr1 FIND V(in1) WHEN PAR'1-abs(V(out1,os)/V(in1))'=0.05
+*.MEAS DC ovr2 FIND V(in1) WHEN PAR'1-abs(V(out2,os)/V(in1))'=0.05
+*.MEAS DC ovr PARAM='(abs(ovr1)+abs(ovr2))/psvoltage*100'
 .MEAS DC psvoltage PARAM=psvoltage
 
 .endl dc3
