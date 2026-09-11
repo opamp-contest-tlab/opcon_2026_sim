@@ -1,5 +1,0 @@
-$DATA1 SOURCE='HSPICE' VERSION='P-2019.06-SP2-2 linux64' PARAM_COUNT=0
-$OPTION MEASFORM=3
-.TITLE 'sr'
-vo1min,vo1max,vo1f,vi1f,srr1,srr2,srr3,srr,vo2max,vo2min,vo2f,vi2f,srf1,srf2,srf3,srf,sr,temper,alter#
--1.9821e-01, 7.8566e-02, 7.8566e-02, 5.0000e-02, 7.2462e+11, 7.9618e+11, 7.9618e+11, 7.7233e+11, 7.8567e-02,-1.9821e-01,-9.9196e-02,-5.0000e-02,-3.5955e+11,-3.3302e+11,-2.7041e+11,-3.2099e+11, 3.2099e+11, 2.5000e+01,1

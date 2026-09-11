@@ -1,5 +1,0 @@
-$DATA1 SOURCE='HSPICE' VERSION='P-2019.06-SP2-2 linux64' PARAM_COUNT=0
-$OPTION MEASFORM=3
-.TITLE 'ac2'
-dcgain,dcgain_db,ugf,freq_half,dcgain_half,product_dcgain_freq,gbw,phase_min,pm,temper,alter#
- 1.8583e+02, 4.5382e+01, 2.4490e+06, 1.4512e+05, 1.3632e+01, 1.9783e+06, 1.9783e+06,-1.3252e+02, 4.7477e+01, 2.5000e+01,3
