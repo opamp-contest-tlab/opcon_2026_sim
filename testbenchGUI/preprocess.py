@@ -19,13 +19,12 @@ def num_eng(value):
     "f": Decimal("1e-15"), "mil": Decimal("25.4e-6"),
   }
 
-  match = re.fullmatch(r"([+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?)([a-z]*)", str(value).lower())
+  # 後ろに余計な単位がついていても無視
+  match = re.fullmatch(r"([+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?)(meg|mil|t|g|k|m|u|n|p|f)?[a-z]*", str(value).lower())
   if not match:
     raise ValueError(f"Invalid number: {value}")
 
   num, unit = match.groups()
-  if unit and unit not in units:
-    raise ValueError(f"Invalid unit: {unit}")
 
   return Decimal(num) * units.get(unit, Decimal("1"))
 
@@ -273,7 +272,7 @@ def check_netlist(netlist, sec):
       if psvoltage < psvoltage_range[0] or psvoltage > psvoltage_range[1]:
         raise ValueError(f"psvoltage out of range: {line}")
 
-      new_netlist.append(line)
+      new_netlist.append(f".param psvoltage={psvoltage:g}")
       continue
 
     # その他のコマンドを禁止
@@ -410,7 +409,8 @@ def check_netlist(netlist, sec):
   # ネットリストを再構成
   new_netlist = "\n".join(new_netlist)
 
-  # 既存コードとの互換性のため返り値はfloatに戻す
+  # floatで返す
+  # (全コードDecimal前提でもいいかもしれません)
   return new_netlist, float(psvoltage), float(area), float(mos_area), float(res_area), float(cap_area)
 
 
