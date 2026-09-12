@@ -1,4 +1,5 @@
 from collections import Counter
+from decimal import Decimal
 import argparse
 import re
 
@@ -13,9 +14,9 @@ def parse_args():
 def num_eng(value):
   # 工学表記を数値に変換
   units = {
-    "t": 1e12, "g": 1e9, "meg": 1e6, "k": 1e3,
-    "m": 1e-3, "u": 1e-6, "n": 1e-9, "p": 1e-12,
-    "f": 1e-15, "mil": 25.4e-6,
+    "t": Decimal("1e12"), "g": Decimal("1e9"), "meg": Decimal("1e6"), "k": Decimal("1e3"),
+    "m": Decimal("1e-3"), "u": Decimal("1e-6"), "n": Decimal("1e-9"), "p": Decimal("1e-12"),
+    "f": Decimal("1e-15"), "mil": Decimal("25.4e-6"),
   }
 
   match = re.fullmatch(r"([+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:e[+-]?\d+)?)([a-z]*)", str(value).lower())
@@ -26,7 +27,7 @@ def num_eng(value):
   if unit and unit not in units:
     raise ValueError(f"Invalid unit: {unit}")
 
-  return float(num) * units.get(unit, 1)
+  return Decimal(num) * units.get(unit, Decimal("1"))
 
 
 def count_res(res, sheet_res):
@@ -73,8 +74,8 @@ def proc_mos(line, nmos_model, pmos_model, diff):
     raise ValueError(f"Invalid M parameter: {line}")
 
   params = dict(params)
-  w = num_eng(params["w"]) * 1e6
-  l = num_eng(params["l"]) * 1e6
+  w = num_eng(params["w"]) * Decimal("1e6")
+  l = num_eng(params["l"]) * Decimal("1e6")
   m = num_eng(params.get("m", "1"))
 
   # 拡散領域を計算
@@ -109,8 +110,8 @@ def proc_rc(line, device):
   if len(m_params) > 1:
     raise ValueError(f"Multiple M parameters: {line}")
 
-  m = num_eng(m_params[0][2:]) if m_params else 1
-  if m < 1 or not float(m).is_integer():
+  m = num_eng(m_params[0][2:]) if m_params else Decimal("1")
+  if m < 1 or m != m.to_integral_value():
     raise ValueError(f"Invalid M: {m} in {line}")
 
   return {
@@ -140,52 +141,52 @@ def check_netlist(netlist, sec):
     nmos_model = "cmosn"
     pmos_model = "cmosp"
     # MOSFET拡散層長さ(um)
-    diff = 0.6
+    diff = Decimal("0.6")
     # MOSFETのW([min, max, step], 単位はum)
-    w_range = [0.27, None, 0.01]
+    w_range = [Decimal("0.27"), None, Decimal("0.01")]
     # MOSFETのL([min, max, step], 単位はum)
-    l_range = [0.18, lambda w: min(10 * w, 50), 0.01]
+    l_range = [Decimal("0.18"), lambda w: min(Decimal("10") * w, Decimal("50")), Decimal("0.01")]
 
     # シート抵抗(Ω/sq)
-    sheet_res = 50
+    sheet_res = Decimal("50")
     # シート1辺の長さ(um)
-    sheet_length = 0.4
+    sheet_length = Decimal("0.4")
     # 抵抗値の範囲([min, max, step])
-    res_range = [1, 1e8, 1]
+    res_range = [Decimal("1"), Decimal("1e8"), Decimal("1")]
 
     # 単位面積容量(F/um^2)
-    unit_cap = 1e-15
+    unit_cap = Decimal("1e-15")
     # 容量の範囲([min, max, step], 単位はF)
-    cap_range = [1e-13, None, None]
+    cap_range = [Decimal("1e-13"), None, None]
 
     # psvoltageの範囲([min, max], 単位はV)
-    psvoltage_range = [0.0, 3.0]
+    psvoltage_range = [Decimal("0.0"), Decimal("3.0")]
 
   elif sec == 4:
     # MOSのモデル名
     nmos_model = "bsim3v3n"
     pmos_model = "bsim3v3p"
     # MOSFET拡散層長さ(um)
-    diff = 1.0
+    diff = Decimal("1.0")
     # MOSFETのW([min, max, step], 単位はum)
-    w_range = [1.2, None, 0.1]
+    w_range = [Decimal("1.2"), None, Decimal("0.1")]
     # MOSFETのL([min, max, step], 単位はum)
-    l_range = [0.6, lambda w: min(10 * w, 140), 0.1]
+    l_range = [Decimal("0.6"), lambda w: min(Decimal("10") * w, Decimal("140")), Decimal("0.1")]
 
     # シート抵抗(Ω/sq)
-    sheet_res = 3e3
+    sheet_res = Decimal("3e3")
     # シート1辺の長さ(um)
-    sheet_length = 2
+    sheet_length = Decimal("2")
     # 抵抗値の範囲([min, max, step])
-    res_range = [60, 5e7, 1]
+    res_range = [Decimal("60"), Decimal("5e7"), Decimal("1")]
 
     # 単位面積容量(F/um^2)
-    unit_cap = 3e-15
+    unit_cap = Decimal("3e-15")
     # 容量の範囲([min, max, step], 単位はF)
-    cap_range = [1e-13, None, None]
+    cap_range = [Decimal("1e-13"), None, None]
 
     # psvoltageの範囲([min, max], 単位はV)
-    psvoltage_range = [0.0, 5.0]
+    psvoltage_range = [Decimal("0.0"), Decimal("5.0")]
 
   else:
     raise ValueError(f"Invalid section: {sec}")
@@ -225,9 +226,9 @@ def check_netlist(netlist, sec):
   psvoltage = None
   nodes = Counter()
 
-  mos_area = 0.0
-  res_area = 0.0
-  cap_area = 0.0
+  mos_area = Decimal("0")
+  res_area = Decimal("0")
+  cap_area = Decimal("0")
   new_netlist = []
 
   for line in netlist.splitlines():
@@ -299,7 +300,7 @@ def check_netlist(netlist, sec):
         raise ValueError(f"W is too small: {w} in {line}")
       if w_range[1] is not None and w > w_range[1]:
         raise ValueError(f"W is too large: {w} in {line}")
-      if w_range[2] is not None and abs(w / w_range[2] - round(w / w_range[2])) > 1e-6:
+      if w_range[2] is not None and w % w_range[2] != 0:
         raise ValueError(f"Invalid W step: {w} in {line}")
 
       # Lをチェック
@@ -309,11 +310,11 @@ def check_netlist(netlist, sec):
         raise ValueError(f"L is too small: {l} in {line}")
       if l_max is not None and l > l_max:
         raise ValueError(f"L is too large: {l} in {line}")
-      if l_range[2] is not None and abs(l / l_range[2] - round(l / l_range[2])) > 1e-6:
+      if l_range[2] is not None and l % l_range[2] != 0:
         raise ValueError(f"Invalid L step: {l} in {line}")
 
       # Mをチェック
-      if m < 1 or not float(m).is_integer():
+      if m < 1 or m != m.to_integral_value():
         raise ValueError(f"Invalid M: {m} in {line}")
 
       # 面積を計算
@@ -325,9 +326,9 @@ def check_netlist(netlist, sec):
       # MOSFETを再構成
       line = (
         f'{mos["name"]} {mos["drain"]} {mos["gate"]} {mos["source"]} {mos["bulk"]} {mos["model"]} '
-        f'l={l * 1e-6:.6e} w={w * 1e-6:.6e} m={m:g} '
-        f'as={mos["as"] * 1e-12:.6e} ps={mos["ps"] * 1e-6:.6e} '
-        f'ad={mos["ad"] * 1e-12:.6e} pd={mos["pd"] * 1e-6:.6e}'
+        f'l={l * Decimal("1e-6"):.6e} w={w * Decimal("1e-6"):.6e} m={m:g} '
+        f'as={mos["as"] * Decimal("1e-12"):.6e} ps={mos["ps"] * Decimal("1e-6"):.6e} '
+        f'ad={mos["ad"] * Decimal("1e-12"):.6e} pd={mos["pd"] * Decimal("1e-6"):.6e}'
       )
 
     # 抵抗行のチェックと書き換え
@@ -342,11 +343,11 @@ def check_netlist(netlist, sec):
         raise ValueError(f"R is too small: {r} in {line}")
       if res_range[1] is not None and r > res_range[1]:
         raise ValueError(f"R is too large: {r} in {line}")
-      if res_range[2] is not None and abs(r / res_range[2] - round(r / res_range[2])) > 1e-6:
+      if res_range[2] is not None and r % res_range[2] != 0:
         raise ValueError(f"Invalid R step: {r} in {line}")
 
       # 面積を計算
-      res_area += count_res(r, sheet_res) * sheet_length ** 2 * m
+      res_area += Decimal(count_res(r, sheet_res)) * sheet_length ** 2 * m
 
       # ノードを記録
       nodes.update([res["node1"], res["node2"]])
@@ -366,7 +367,7 @@ def check_netlist(netlist, sec):
         raise ValueError(f"C is too small: {c} in {line}")
       if cap_range[1] is not None and c > cap_range[1]:
         raise ValueError(f"C is too large: {c} in {line}")
-      if cap_range[2] is not None and abs(c / cap_range[2] - round(c / cap_range[2])) > 1e-6:
+      if cap_range[2] is not None and c % cap_range[2] != 0:
         raise ValueError(f"Invalid C step: {c} in {line}")
 
       # 面積を計算
@@ -398,7 +399,7 @@ def check_netlist(netlist, sec):
   floating_nodes = [node for node, count in nodes.items() if count == 1 and node not in ("inm", "inp")]
   if floating_nodes:
     raise ValueError(f"Floating nodes found: {', '.join(floating_nodes)}")
-  
+
   # 内部にグランド(gnd, 0, ground)があるかチェック
   if any(node in ("0", "gnd", "ground") for node in nodes):
     raise ValueError("Internal ground node found.")
@@ -409,7 +410,8 @@ def check_netlist(netlist, sec):
   # ネットリストを再構成
   new_netlist = "\n".join(new_netlist)
 
-  return new_netlist, psvoltage, area, mos_area, res_area, cap_area
+  # 既存コードとの互換性のため返り値はfloatに戻す
+  return new_netlist, float(psvoltage), float(area), float(mos_area), float(res_area), float(cap_area)
 
 
 def main():
