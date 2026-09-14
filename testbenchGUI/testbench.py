@@ -8,6 +8,7 @@ import re
 import shutil
 import subprocess
 import sys
+from preprocess import check_netlist
 
 # このファイルが存在するフォルダをカレントディレクトリに設定
 BASE_DIR = Path(__file__).resolve().parent
@@ -74,7 +75,6 @@ def run_hspice(input_file, output_file):
 
 
 def copy_opamp_to_tmp():
-    # NOTE: 拡散長の処理を加えていないので本番環境ではここで加える処理を追加するべし
     """opamp.sp を加工せず、テストベンチが参照する tmp.sp へコピーする。"""
     source_file = BASE_DIR / "opamp.sp"
     target_file = BASE_DIR / "tmp.sp"
@@ -166,6 +166,16 @@ def run_dep1_simulations(output_dir):
     for input_file in (sim1_file, sim2_file):
         if not input_file.is_file():
             raise FileNotFoundError(f"テストベンチが見つかりません: {input_file}")
+
+    # ネットリストのフォーマット正規化、面積計算
+    with open(BASE_DIR / "tmp.sp", "r", encoding="utf-8") as f:
+        netlist = f.read()
+    new_netlist, psvoltage, area, _, _, _ = check_netlist(netlist, 1)
+    with open(BASE_DIR / "tmp.sp", "w", encoding="utf-8") as f:
+        f.write(new_netlist)
+    # 有効数字3桁で表示
+    print(f"psvoltage: {psvoltage:.2e} V")
+    print(f"area: {area:.2e} um^2")
 
     # sim1.sp を実行し、srdc の測定値 amp を取得する。
     try:
