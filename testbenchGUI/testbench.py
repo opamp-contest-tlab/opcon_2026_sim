@@ -401,6 +401,8 @@ def extract_from_csv(area):
     cmir_path = csv_dir / "result1.printsw4"
     cmr1_candidates = []
     cmr2_candidates = []
+    get_cmr1 = True
+    get_cmr2 = True
     if cmir_path.is_file():
         with cmir_path.open(encoding="utf-8", errors="replace") as file:
             for line in file:
@@ -415,20 +417,29 @@ def extract_from_csv(area):
                 except ValueError:
                     continue
 
-                if values[3] < error_limit:
-                    cmr1_candidates.append(values[0])
-                if values[4] < error_limit:
-                    cmr2_candidates.append(values[0])
+                if get_cmr1:
+                    if values[3] < error_limit:
+                        cmr1_candidates.append(values[0])
+                    else:
+                        get_cmr1 = False
+                if get_cmr2:
+                    if values[4] < error_limit:
+                        cmr2_candidates.append(values[0])
+                    else:
+                        get_cmr2 = False
+                if not get_cmr1 and not get_cmr2:
+                    break
 
     results["cmr1"] = max(cmr1_candidates) if cmr1_candidates else Decimal("0")
     results["cmr2"] = max(cmr2_candidates) if cmr2_candidates else Decimal("0")
 
     # OVR: result1.printsw8 の数値列は [V(in), V(out1, os), V(out2, os),
-    # out1 の誤差, out2 の誤差]。各出力の誤差が 0.05 以下である行から、
-    # 対応する V(in) の最大値を求める。
+    # out1 の誤差, out2 の誤差]。各出力の誤差が0.05より大きくならない最大のV(in)を求める。
     ovr_path = csv_dir / "result1.printsw8"
     ovr1_candidates = []
     ovr2_candidates = []
+    get_ovr1 = True
+    get_ovr2 = True
     if ovr_path.is_file():
         with ovr_path.open(encoding="utf-8", errors="replace") as file:
             for line in file:
@@ -447,12 +458,20 @@ def extract_from_csv(area):
                 if vin == 0:
                     continue
                 # 誤差列がない古い出力形式では、出力電圧から算出する。
-                ovr1_error = values[3] if len(values) == 5 else 1 - abs(vout1 / vin)
-                ovr2_error = values[4] if len(values) == 5 else 1 - abs(vout2 / vin)
-                if ovr1_error <= error_limit:
-                    ovr1_candidates.append(vin)
-                if ovr2_error <= error_limit:
-                    ovr2_candidates.append(vin)
+                ovr1_error = values[3] if len(values) == 5 else abs(1 - abs(vout1 / vin))
+                ovr2_error = values[4] if len(values) == 5 else abs(1 - abs(vout2 / vin))
+                if get_ovr1:
+                    if ovr1_error <= error_limit:
+                        ovr1_candidates.append(vin)
+                    else:
+                        get_ovr1 = False
+                if get_ovr2:
+                    if ovr2_error <= error_limit:
+                        ovr2_candidates.append(vin)
+                    else:
+                        get_ovr2 = False
+                if not get_ovr1 and not get_ovr2:
+                    break
 
     results["ovr1"] = max(ovr1_candidates) if ovr1_candidates else Decimal("0")
     results["ovr2"] = max(ovr2_candidates) if ovr2_candidates else Decimal("0")
