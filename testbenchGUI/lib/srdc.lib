@@ -1,6 +1,8 @@
 
 * Slew RateのVAを決定するためのネットリスト
 .lib srdc
+VDD	vdd 0		half
+VSS	0 vss		half
 
 * For positive amplitude
 X1a	s1 in1 out1 vdd vss	opamp
