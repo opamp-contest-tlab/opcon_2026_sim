@@ -184,7 +184,7 @@ def run_dep1_simulations(output_dir):
         results = {"abort": True}
         print(results)
         return results
-    results = extract_from_csv()
+    results = extract_from_csv(area)
     print(results)
     amp = results.get("amp")
     if not isinstance(amp, (int, float)) or amp <= 0:
