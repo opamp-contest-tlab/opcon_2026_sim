@@ -1,5 +1,6 @@
 import argparse
 import csv
+from decimal import Decimal, InvalidOperation
 import json
 import os
 from pathlib import Path
@@ -9,6 +10,19 @@ import shutil
 import subprocess
 import sys
 from preprocess import check_netlist
+
+
+def to_decimal(value):
+  """HSPICEの数値文字列をDecimalへ変換"""
+  try:
+    return Decimal(value.replace("D", "E").replace("d", "e"))
+  except InvalidOperation as e:
+    raise ValueError(f"Invalid numeric value: {value}") from e
+
+
+def print_results(results):
+    """Decimalの結果を有効数字5桁の指数表記で表示"""
+    print({key: f"{value:.4e}" if isinstance(value, Decimal) else value for key, value in results.items()})
 
 # このファイルが存在するフォルダをカレントディレクトリに設定
 BASE_DIR = Path(__file__).resolve().parent
@@ -107,7 +121,7 @@ def write_for_sr_lib(vp):
         "* Vp value for SR\n\n.lib vpval\n.param vp={:.16g}\n.endl vpval\n".format(vp),
         encoding="utf-8",
     )
-    print(f"Created: {path.name} (vp={vp:.6g})")
+    print(f"Created: {path.name} (vp={vp:.4e})")
     return path
 
 
@@ -138,7 +152,7 @@ def extract_tf_output_resistance(listing_path):
     if not values:
         return None
 
-    return float(values[-1].replace("D", "E").replace("d", "e"))
+    return to_decimal(values[-1])
 
 
 def extract_total_harmonic_distortion(listing_path):
@@ -156,7 +170,7 @@ def extract_total_harmonic_distortion(listing_path):
     if not values:
         return None
 
-    return float(values[-1].replace("D", "E").replace("d", "e"))
+    return to_decimal(values[-1])
 
 
 def run_dep1_simulations(output_dir):
@@ -171,10 +185,12 @@ def run_dep1_simulations(output_dir):
     with open(BASE_DIR / "tmp.sp", "r", encoding="utf-8") as f:
         netlist = f.read()
     new_netlist, psvoltage, area, _, _, _ = check_netlist(netlist, 1)
+    psvoltage = Decimal(str(psvoltage))
+    area = Decimal(str(area))
     with open(BASE_DIR / "tmp.sp", "w", encoding="utf-8") as f:
         f.write(new_netlist)
-    # 有効数字3桁で表示
-    print(f"psvoltage: {psvoltage:.2e} V")
+    # 有効数字5桁で表示
+    print(f"psvoltage: {psvoltage:.4e} V")
     print(f"area: {area:.4e} um^2")
 
     # sim1.sp を実行し、srdc の測定値 amp を取得する。
@@ -182,13 +198,13 @@ def run_dep1_simulations(output_dir):
         listing_file = run_hspice(sim1_file, output_dir / "result1.lis")
     except RuntimeError:
         results = {"abort": True}
-        print(results)
+        print_results(results)
         return results
     results = extract_from_csv(area)
-    print(results)
+    print_results(results)
     amp = results.get("amp")
-    if not isinstance(amp, (int, float)) or amp <= 0:
-        amp = 0.1
+    if not isinstance(amp, Decimal) or amp <= 0:
+        amp = Decimal("0.1")
         print("sim1.sp の amp が取得できないため、vp=100m を使用します。")
 
     # sim1のampをvpvalとしてfor_sr.libへ設定後、sim2.spを実行する。
@@ -197,7 +213,7 @@ def run_dep1_simulations(output_dir):
         listing_file = run_hspice(sim2_file, output_dir / "result2.lis")
     except RuntimeError:
         results = {"abort": True}
-        print(results)
+        print_results(results)
         return results
     return print_measurements(listing_file, area)
 
@@ -235,7 +251,7 @@ def extract_from_csv(area):
     csv_dir = BASE_DIR / "lis"
 
     def read_first_row(filename):
-        """測定 CSV の最初のデータ行を {列名: float} で返す。"""
+        """測定 CSV の最初のデータ行を {列名: Decimal} で返す。"""
         path = csv_dir / filename
         if not path.is_file():
             return {}
@@ -258,7 +274,7 @@ def extract_from_csv(area):
                 continue
             try:
                 # HSPICE が指数部に D を用いる場合にも対応する。
-                values[name.strip()] = float(value.replace("D", "E").replace("d", "e"))
+                values[name.strip()] = to_decimal(value)
             except ValueError:
                 continue
         return values
@@ -280,7 +296,7 @@ def extract_from_csv(area):
                 value = power_rows[1].get(name, "")
                 if value.strip().lower() != "failed":
                     try:
-                        results[name] = float(value.replace("D", "E").replace("d", "e"))
+                        results[name] = to_decimal(value)
                     except ValueError:
                         pass
     # 消費電流の9パターン(result1.ms0.csv, result1.ms1.csv, result1.ms2.csv)
@@ -305,7 +321,7 @@ def extract_from_csv(area):
                     ib_measurement_failed = True
                     continue
                 try:
-                    ib_values.append(float(value.replace("D", "E").replace("d", "e")))
+                    ib_values.append(to_decimal(value))
                 except ValueError:
                     ib_measurement_failed = True
 
@@ -313,10 +329,10 @@ def extract_from_csv(area):
         ibr = max(
             abs(value - reference_ib) / abs(reference_ib) for value in ib_values
         )
-        results["ibr"] = ibr * 100  # num -> % 変換
+        results["ibr"] = ibr * Decimal("100")  # num -> % 変換
         # 既存の出力キーを利用している呼び出し元との互換性を維持する。
         results["ib_diff"] = ibr
-        results["ib_const"] = not ib_measurement_failed and ibr < 0.5
+        results["ib_const"] = not ib_measurement_failed and ibr < Decimal("0.5")
     else:
         results["ibr"] = None
         results["ib_const"] = False
@@ -324,7 +340,7 @@ def extract_from_csv(area):
     # 出力抵抗: .TF の結果は CSV 化されないため result1.lis から取得する。
     rosim = extract_tf_output_resistance(csv_dir / "result1.lis")
     if rosim is not None:
-        results["rosim"] = max(rosim, 0.1)
+        results["rosim"] = max(rosim, Decimal("0.1"))
 
     # THD: .FFT の結果は CSV 化されないため result1.lis から取得する。
     thd = extract_total_harmonic_distortion(csv_dir / "result1.lis")
@@ -376,7 +392,7 @@ def extract_from_csv(area):
         if name in values:
             results[name] = values[name]
     # 個別の処理の計算
-    error_limit = 0.05
+    error_limit = Decimal("0.05")
 
     # CMIR: result1.printsw4 の数値列は、それぞれ
     # [V(in1), V(out1, os), V(out2, os), out1 の誤差, out2 の誤差]。
@@ -393,7 +409,7 @@ def extract_from_csv(area):
                     continue
                 try:
                     values = [
-                        float(field.replace("D", "E").replace("d", "e"))
+                        to_decimal(field)
                         for field in fields
                     ]
                 except ValueError:
@@ -404,8 +420,8 @@ def extract_from_csv(area):
                 if values[4] < error_limit:
                     cmr2_candidates.append(values[0])
 
-    results["cmr1"] = max(cmr1_candidates) if cmr1_candidates else 0.0
-    results["cmr2"] = max(cmr2_candidates) if cmr2_candidates else 0.0
+    results["cmr1"] = max(cmr1_candidates) if cmr1_candidates else Decimal("0")
+    results["cmr2"] = max(cmr2_candidates) if cmr2_candidates else Decimal("0")
 
     # OVR: result1.printsw8 の数値列は [V(in), V(out1, os), V(out2, os),
     # out1 の誤差, out2 の誤差]。各出力の誤差が 0.05 以下である行から、
@@ -421,7 +437,7 @@ def extract_from_csv(area):
                     continue
                 try:
                     values = [
-                        float(field.replace("D", "E").replace("d", "e"))
+                        to_decimal(field)
                         for field in fields
                     ]
                 except ValueError:
@@ -438,28 +454,27 @@ def extract_from_csv(area):
                 if ovr2_error <= error_limit:
                     ovr2_candidates.append(vin)
 
-    results["ovr1"] = max(ovr1_candidates) if ovr1_candidates else 0.0
-    results["ovr2"] = max(ovr2_candidates) if ovr2_candidates else 0.0
+    results["ovr1"] = max(ovr1_candidates) if ovr1_candidates else Decimal("0")
+    results["ovr2"] = max(ovr2_candidates) if ovr2_candidates else Decimal("0")
 
     psvoltage = results.get("psvoltage")
-    if isinstance(psvoltage, (int, float)) and psvoltage != 0:
-        results["cmir"] = round( (0.5 * (results["cmr1"] + results["cmr2"]) / psvoltage * 100) ,5)
-        results["ovr"] = round_sig( ((abs(results["ovr1"]) + abs(results["ovr2"])) / psvoltage * 100) ,5)
+    if isinstance(psvoltage, Decimal) and psvoltage != 0:
+        results["cmir"] = round((Decimal("0.5") * (results["cmr1"] + results["cmr2"]) / psvoltage * Decimal("100")), 5)
+        results["ovr"] = round_sig(((abs(results["ovr1"]) + abs(results["ovr2"])) / psvoltage * Decimal("100")), 5)
 
     return results
 
-import math
 def round_sig(value, digits=4):
     # 有効数字で丸める関数
     if value == 0:
-        return 0.0
-    return round(value, digits - 1 - int(math.floor(math.log10(abs(value)))))
+        return Decimal("0")
+    return value.quantize(Decimal(f"1e{value.adjusted() - digits + 1}"))
 
 
 def print_measurements(listing_file, area):
     """HSPICE が生成した測定CSVの抽出結果をそのまま表示する。"""
     results = extract_from_csv(area)
-    print(results)
+    print_results(results)
     return results
 
 
