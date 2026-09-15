@@ -175,7 +175,7 @@ def run_dep1_simulations(output_dir):
         f.write(new_netlist)
     # 有効数字3桁で表示
     print(f"psvoltage: {psvoltage:.2e} V")
-    print(f"area: {area:.2e} um^2")
+    print(f"area: {area:.4e} um^2")
 
     # sim1.sp を実行し、srdc の測定値 amp を取得する。
     try:
@@ -199,7 +199,7 @@ def run_dep1_simulations(output_dir):
         results = {"abort": True}
         print(results)
         return results
-    return print_measurements(listing_file)
+    return print_measurements(listing_file, area)
 
 
 def run_random_dep1_simulation(output_dir):
@@ -226,7 +226,7 @@ def run_random_dep1_simulation(output_dir):
     return run_dep1_simulations(output_dir)
 
 
-def extract_from_csv():
+def extract_from_csv(area):
     """``lis/result1.*.csv`` から部門1の測定結果を抽出して返す。
 
     HSPICE の測定 CSV は先頭3行がメタデータで、4行目がヘッダーである。
@@ -264,6 +264,9 @@ def extract_from_csv():
         return values
 
     results = {}
+
+    # 面積は check_netlist() で計算済みの値を使用
+    results["area"] = area
 
     # 消費電流・消費電力: 25 ℃、電源電圧 half V の行(result1.ms1.csvの2行目)を使用する。
     power_path = csv_dir / "result1.ms1.csv"
@@ -453,9 +456,9 @@ def round_sig(value, digits=4):
     return round(value, digits - 1 - int(math.floor(math.log10(abs(value)))))
 
 
-def print_measurements(listing_file):
+def print_measurements(listing_file, area):
     """HSPICE が生成した測定CSVの抽出結果をそのまま表示する。"""
-    results = extract_from_csv()
+    results = extract_from_csv(area)
     print(results)
     return results
 
