@@ -63,6 +63,6 @@ E1	0 in2 in1 0	1    $ inverted input for fall edge
 * Choose the smaller value as slewrate measurement result
 .MEAS TRAN sr   PARAM='min(abs(srr),abs(srf))'
 
-.PRINT TRAN V(o1,os) V(o2,os)
+* .PRINT TRAN V(o1,os) V(o2,os)
 
 .endl tran1
