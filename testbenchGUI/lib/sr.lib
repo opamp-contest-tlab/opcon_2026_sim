@@ -38,8 +38,8 @@ E1	0 in2 in1 0	1    $ inverted input for fall edge
 + tp=200u         $ pulse width
  
 * Analysis
-* .TRAN 10p 400u    $ transient simulation for 400us with 10ps time step
-.TRAN 1n 400u    $ transient simulation for 400us with 10ps time step
+.TRAN 10p 400u    $ transient simulation for 400us with 10ps time step
+* .TRAN 1n 400u    $ transient simulation for 400us with 10ps time step
 * Measurements for rise edge (remove offset voltage from the output voltage)
 .MEAS TRAN vo1min  FIND  V(o1,os) AT=0
 .MEAS TRAN vo1max  FIND  V(o1,os) AT=200u
