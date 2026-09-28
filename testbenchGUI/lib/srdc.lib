@@ -36,7 +36,6 @@ E1	0 in2 in1 0		1
 + PAR'abs(V(out2,os)-V(in2)*G)/V(in1)'
 *.MEAS DC vps PARAM='abs(V(out1,os)-V(in1)*G)/V(in1)'
 *.MEAS DC vns PARAM='abs(V(out2,os)-V(in2)*G)/V(in2)'
-* NOTE: MEASだとfailedになるけど、誤差が5%以上になる場所を探しているなら、failedだったら誤差がないってことでは？
 .MEAS DC vpmax FIND V(in1) WHEN PAR'abs(V(out1,os)-V(in1)*G)/V(in1)'=0.05 RISE=1
 .MEAS DC vnmax FIND V(in1) WHEN PAR'abs(V(out2,os)-V(in2)*G)/V(in1)'=0.05 RISE=1
 .MEAS DC amp PARAM='min(vpmax,abs(vnmax))*ar'
