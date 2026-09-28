@@ -10,19 +10,21 @@ VSS     0 vss   'half'
  
 * Positive side
 X1a     inm1 inp1 outx1 vdd vss opamp
-R1a     in1 inp1                'rload/2'
-R2a     inp1 0                  'rload/2'
-R3a     in1 inm1                'rload/2'
-R4a     inm1 out1               rload
+R3a     in1 inp1                'rload/2'
+R4a     inp1 0                  'rload/2'
+R1a     in1 inm1                'rload/2'
+R2a     inm1 out1               rload
+Rla     outx1 0                 rload
 E1a     out1 0 outx1 0          bgain
 * R5a     outx1 0                 rload
  
 * Negative side
 X1b     inm2 inp2 outx2 vdd vss opamp
-R1b     in2 inp2                'rload/2'
-R2b     inp2 0                  'rload/2'
-R3b     in2 inm2                'rload/2'
-R4b     inm2 out2               rload
+R3b     in2 inp2                'rload/2'
+R4b     inp2 0                  'rload/2'
+R1b     in2 inm2                'rload/2'
+R2b     inm2 out2               rload
+Rlb     outx2 0                 rload
 E1b     out2 0 outx2 0          bgain
 * R5b     outx2 0                 rload
  
@@ -30,6 +32,7 @@ E1b     out2 0 outx2 0          bgain
 X2      inm3 0 osx vdd vss      opamp
 R12     0 inm3                  'rload/2'
 R22     inm3 os                 rload
+Rl2     osx 0                   rload
 E2      os 0 osx 0              bgain
 * R32     osx 0                   rload
  
@@ -42,7 +45,6 @@ E2      os 0 osx 0              bgain
 * PRINTからPythonで条件式で持って来るように設定
 .PRINT V(out1,os) V(out2,os)
 * + PAR'1-ABS(V(out1,os))/(0.5*V(in1))' PAR'1-ABS(V(out2,os))/(0.5*V(in1))'
-* ABSが足りてないんじゃないか説
 + PAR'ABS(1-ABS(V(out1,os))/(0.5*V(in1)))' PAR'ABS(1-ABS(V(out2,os))/(0.5*V(in1)))'
 * .MEAS DC cmr1 FIND V(in1) WHEN PAR'abs(1-abs(V(out1,os)/(0.5*V(in1))))'=0.05 
 * .MEAS DC cmr2 FIND V(in1) WHEN PAR'abs(1-abs(V(out2,os)/(0.5*V(in1))))'=0.05
