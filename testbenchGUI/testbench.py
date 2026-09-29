@@ -339,8 +339,9 @@ def extract_from_csv(area):
 
     # 出力抵抗: .TF の結果は CSV 化されないため result1.lis から取得する。
     rosim = extract_tf_output_resistance(csv_dir / "result1.lis")
-    if rosim is not None:
-        results["rosim"] = max(rosim, Decimal("0.1"))
+    # 現行システムでは補正式を通した後にroのクリッピングをしているっぽい
+    # if rosim is not None:
+    #     results["rosim"] = max(rosim, Decimal("0.1"))
 
     # THD: .FFT の結果は CSV 化されないため result1.lis から取得する。
     thd = extract_total_harmonic_distortion(csv_dir / "result1.lis")
