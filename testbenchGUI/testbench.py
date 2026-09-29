@@ -342,6 +342,7 @@ def extract_from_csv(area):
     # 現行システムでは補正式を通した後にroのクリッピングをしているっぽい
     # if rosim is not None:
     #     results["rosim"] = max(rosim, Decimal("0.1"))
+    results["rosim"] = rosim
 
     # THD: .FFT の結果は CSV 化されないため result1.lis から取得する。
     thd = extract_total_harmonic_distortion(csv_dir / "result1.lis")
